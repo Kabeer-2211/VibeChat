@@ -76,9 +76,13 @@ export async function login(
   req: Request<{}, {}, { email: string; password: string }>,
   res: Response<ApiResponse>
 ): Promise<void> {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    res.status(400).json({ success: false, message: errors.array()[0].msg });
+  }
   try {
     const { email, password } = req.body;
-    const user = await UserModel.findOne({ email }).select('+password');
+    const user = await UserModel.findOne({ email }).select("+password");
     if (!user) {
       res.status(404).json({ success: false, message: "user not found" });
       return;
@@ -93,14 +97,66 @@ export async function login(
       return;
     }
     const token = await user.generateToken();
-    res
-      .status(200)
-      .json({
-        success: true,
-        message: "user logged in successfully",
-        token,
-        user,
-      });
+    res.status(200).json({
+      success: true,
+      message: "user logged in successfully",
+      token,
+      user,
+    });
+    return;
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ success: false, message: "an error occurred" });
+    return;
+  }
+}
+
+export async function verifyEmail(
+  req: Request<{ id: string }, {}, { verifyCode: Number }>,
+  res: Response<ApiResponse>
+): Promise<void> {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    res.status(400).json({ success: false, message: errors.array()[0].msg });
+  }
+  try {
+    const { verifyCode } = req.body;
+    const { id } = req.params;
+    const user = await UserModel.findById(id).select(["+verifyCode", "+verifiedCodeExpiry"]);
+    if (!user) {
+      res.status(400).json({ success: false, message: "user does not exist" });
+      return;
+    }
+    if (user.isVerified) {
+      res
+        .status(400)
+        .json({ success: false, message: "user already verified" });
+      return;
+    }
+    if (verifyCode != user.verifyCode) {
+      res
+        .status(400)
+        .json({ success: false, message: "Invalid verification code" });
+      return;
+    }
+    const expiryDate = user.verifiedCodeExpiry;
+    const currentDate = new Date();
+    if (expiryDate < currentDate) {
+      res
+        .status(400)
+        .json({ success: false, message: "verification code expired" });
+      return;
+    }
+    user.isVerified = true;
+    await user.save();
+    const token = await user.generateToken();
+
+    res.status(200).json({
+      success: true,
+      message: "user verified successfully",
+      token,
+      user,
+    });
     return;
   } catch (err) {
     console.log(err);

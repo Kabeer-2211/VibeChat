@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { body } from "express-validator";
 import multer from "multer";
+import path from "path";
 
 import * as AuthControllers from "./../controllers/Auth.controller";
 
@@ -18,7 +19,17 @@ const storage = multer.diskStorage({
   },
 });
 
-const upload = multer({ storage });
+const upload = multer({
+  storage,
+  limits: { fileSize: 1000000 * 5 },
+  fileFilter: function (req, file, cb) {
+    const ext = path.extname(file.originalname);
+    if (ext !== ".jpg" && ext !== ".png" && ext !== ".jpeg") {
+      return cb(new Error("Only JPG, JPEG, or PNG files are allowed"));
+    }
+    cb(null, true);
+  },
+});
 
 router.post(
   "/register",
@@ -46,6 +57,16 @@ router.post(
     .isLength({ min: 8 })
     .withMessage("Password must be at least 8 characters"),
   AuthControllers.login
+);
+
+router.post(
+  "/verify-email/:id",
+  body("verifyCode")
+    .isInt()
+    .withMessage("Verification code is required")
+    .isLength({ min: 6, max: 6 })
+    .withMessage("Verification code must be 6 characters long"),
+  AuthControllers.verifyEmail
 );
 
 export default router;
