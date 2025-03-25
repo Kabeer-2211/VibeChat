@@ -79,7 +79,7 @@ userSchema.methods.generateToken = async function (
   password: string
 ): Promise<string> {
   return await jwt.sign(
-    { username: this.username, email: this.email, avatar: this.avatar },
+    { id: this._id },
     process.env.JWT_SECRET as string
   );
 };

@@ -7,6 +7,7 @@ import { validationResult } from "express-validator";
 import { ApiResponse } from "./../types/ApiResponse";
 import { createUser } from "./../services/auth.service";
 import UserModel from "../models/User.model";
+import { Mail } from "./../services/mail.service";
 
 interface UserRequestBody {
   username: string;
@@ -57,6 +58,12 @@ export async function register(
     } else {
       user = await createUser(username, email, avatar, password);
     }
+    let html = await fs.readFileSync(
+      path.join(__dirname, "/../../../src/emails/template.html"),
+      "utf8"
+    );
+    html = html.replace("@verifyCode", String(user.verifyCode));
+    Mail(user.email, "Verify You Email", html);
     const token = await user.generateToken();
     res.json({
       success: true,
@@ -82,13 +89,24 @@ export async function login(
   }
   try {
     const { email, password } = req.body;
-    const user = await UserModel.findOne({ email }).select("+password");
+    const user = await UserModel.findOne({ email }).select(["+password", "+verifyCode"]);
     if (!user) {
       res.status(404).json({ success: false, message: "user not found" });
       return;
     }
     if (!user.isVerified) {
-      res.status(400).json({ success: false, message: "user not verified" });
+      let html = await fs.readFileSync(
+        path.join(__dirname, "/../../../src/emails/template.html"),
+        "utf8"
+      );
+      html = html.replace("@verifyCode", String(user.verifyCode));
+      Mail(user.email, "Verify You Email", html);
+      res
+        .status(400)
+        .json({
+          success: false,
+          message: "Verify your email first. An email has been sent to you.",
+        });
       return;
     }
     const isCorrectPassword = await user.comparePassword(password);
@@ -122,7 +140,10 @@ export async function verifyEmail(
   try {
     const { verifyCode } = req.body;
     const { id } = req.params;
-    const user = await UserModel.findById(id).select(["+verifyCode", "+verifiedCodeExpiry"]);
+    const user = await UserModel.findById(id).select([
+      "+verifyCode",
+      "+verifiedCodeExpiry",
+    ]);
     if (!user) {
       res.status(400).json({ success: false, message: "user does not exist" });
       return;
@@ -161,6 +182,23 @@ export async function verifyEmail(
   } catch (err) {
     console.log(err);
     res.status(500).json({ success: false, message: "an error occurred" });
+    return;
+  }
+}
+
+export async function getUserProfile(
+  req: Request,
+  res: Response
+): Promise<void> {
+  try {
+    const user = req.user;
+    res
+      .status(200)
+      .json({ success: true, message: "user retrieved successfully", user });
+    return;
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ success: false, message: "Internal server error" });
     return;
   }
 }

@@ -1,7 +1,10 @@
+import path from "path";
+
 import { Router } from "express";
 import { body } from "express-validator";
 import multer from "multer";
-import path from "path";
+
+import { auth } from "./../middleware/Auth.middleware";
 
 import * as AuthControllers from "./../controllers/Auth.controller";
 
@@ -68,5 +71,7 @@ router.post(
     .withMessage("Verification code must be 6 characters long"),
   AuthControllers.verifyEmail
 );
+
+router.get("/user/profile", auth, AuthControllers.getUserProfile);
 
 export default router;
