@@ -23,6 +23,7 @@ export async function register(
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     res.status(400).json({ success: false, message: errors.array()[0].msg });
+    return;
   }
   try {
     const { username, email, password } = req.body;
@@ -86,10 +87,14 @@ export async function login(
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     res.status(400).json({ success: false, message: errors.array()[0].msg });
+    return;
   }
   try {
     const { email, password } = req.body;
-    const user = await UserModel.findOne({ email }).select(["+password", "+verifyCode"]);
+    const user = await UserModel.findOne({ email }).select([
+      "+password",
+      "+verifyCode",
+    ]);
     if (!user) {
       res.status(404).json({ success: false, message: "user not found" });
       return;
@@ -101,12 +106,10 @@ export async function login(
       );
       html = html.replace("@verifyCode", String(user.verifyCode));
       Mail(user.email, "Verify You Email", html);
-      res
-        .status(400)
-        .json({
-          success: false,
-          message: "Verify your email first. An email has been sent to you.",
-        });
+      res.status(400).json({
+        success: false,
+        message: "Verify your email first. An email has been sent to you.",
+      });
       return;
     }
     const isCorrectPassword = await user.comparePassword(password);
@@ -136,6 +139,7 @@ export async function verifyEmail(
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     res.status(400).json({ success: false, message: errors.array()[0].msg });
+    return;
   }
   try {
     const { verifyCode } = req.body;
@@ -182,6 +186,37 @@ export async function verifyEmail(
   } catch (err) {
     console.log(err);
     res.status(500).json({ success: false, message: "an error occurred" });
+    return;
+  }
+}
+
+export async function changePassword(
+  req: Request<{}, {}, { password: string; new_password: string }>,
+  res: Response
+): Promise<void> {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    res.status(400).json({ success: false, message: errors.array()[0].msg });
+    return;
+  }
+  try {
+    const { password, new_password } = req.body;
+    let user = req.user;
+    user = await UserModel.findById(user._id).select("+password");
+    const isPasswordMatch = await user.comparePassword(password);
+    if (!isPasswordMatch) {
+      res.status(400).json({ success: false, message: "Incorrect password" });
+    }
+    const hashedPassword = await UserModel.hashPassword(new_password);
+    user.password = hashedPassword;
+    await user.save();
+    res
+      .status(200)
+      .json({ success: true, message: "password changed successfully" });
+    return;
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ success: false, message: "Internal server error" });
     return;
   }
 }

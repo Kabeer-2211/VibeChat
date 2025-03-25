@@ -72,6 +72,34 @@ router.post(
   AuthControllers.verifyEmail
 );
 
+router.post(
+  "/change-password",
+  body("password")
+    .isString()
+    .withMessage("Password is required")
+    .isLength({ min: 8 })
+    .withMessage("Password must be at least 8 characters"),
+  body("new_password")
+    .isString()
+    .withMessage("New password is required")
+    .isLength({ min: 8 })
+    .withMessage("New Password must be at least 8 characters"),
+  auth,
+  AuthControllers.changePassword
+);
+
+// router.post(
+//   "/update-user-info",
+//   upload.single("avatar"),
+//   body("username")
+//     // .isString()
+//     // .withMessage("Password is required")
+//     .isLength({ min: 3 })
+//     .withMessage("Username must be at least 3 characters"),
+//   auth,
+//   AuthControllers.changePassword
+// );
+
 router.get("/user/profile", auth, AuthControllers.getUserProfile);
 
 export default router;
