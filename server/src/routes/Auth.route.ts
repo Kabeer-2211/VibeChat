@@ -2,41 +2,16 @@ import path from "path";
 
 import { Router } from "express";
 import { body } from "express-validator";
-import multer from "multer";
 
 import { auth } from "./../middleware/Auth.middleware";
-
 import * as AuthControllers from "./../controllers/Auth.controller";
+import { uploadFile } from "../middleware/FileUpload.middleware";
 
 const router = Router();
 
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "src/public/avatars");
-  },
-  filename: function (req, file, cb) {
-    cb(
-      null,
-      `${Date.now()}-${Math.floor(Math.random() * 100000)}-${file.originalname}`
-    );
-  },
-});
-
-const upload = multer({
-  storage,
-  limits: { fileSize: 1000000 * 5 },
-  fileFilter: function (req, file, cb) {
-    const ext = path.extname(file.originalname);
-    if (ext !== ".jpg" && ext !== ".png" && ext !== ".jpeg") {
-      return cb(new Error("Only JPG, JPEG, or PNG files are allowed"));
-    }
-    cb(null, true);
-  },
-});
-
 router.post(
   "/register",
-  upload.single("avatar"),
+  uploadFile,
   [body("username")
     .isString()
     .withMessage("Username is required")
@@ -92,17 +67,22 @@ router.post(
   AuthControllers.changePassword
 );
 
-// router.post(
-//   "/update-user-info",
-//   upload.single("avatar"),
-//   body("username")
-//     // .isString()
-//     // .withMessage("Password is required")
-//     .isLength({ min: 3 })
-//     .withMessage("Username must be at least 3 characters"),
-//   auth,
-//   AuthControllers.changePassword
-// );
+router.post(
+  "/update-user-info",
+  uploadFile,
+  [
+    body("username")
+      .optional()
+      .isLength({ min: 3 })
+      .withMessage("Username must be at least 3 characters"),
+    body("bio")
+      .optional()
+      .isLength({ min: 10 })
+      .withMessage("Bio must be at least 10 characters")
+  ],
+  auth,
+  AuthControllers.updateUserInfo
+);
 
 router.get("/user/profile", auth, AuthControllers.getUserProfile);
 

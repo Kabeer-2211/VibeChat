@@ -224,6 +224,54 @@ export async function changePassword(
   }
 }
 
+export async function updateUserInfo(
+  req: Request<{}, {}, { username?: string; bio?: string, avatar?: Express.Multer.File }>,
+  res: Response
+): Promise<void> {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    res.status(400).json({ success: false, message: errors.array()[0].msg });
+    return;
+  }
+  try {
+    const { username, bio } = req.body;
+    const avatar = req.file?.filename as string;
+    let user = req.user;
+    user = await UserModel.findById(user._id);
+    if (!user) {
+      res.status(400).json({ success: false, message: "User does not exist" });
+      return;
+    }
+    if (!user.isVerified) {
+      res.status(400).json({ success: false, message: "User not verified" });
+      return;
+    }
+    if (username || bio || avatar) {
+      if (avatar) {
+        fs.unlink(
+          path.join(
+            __dirname,
+            `/../../../src/public/avatars/${user.avatar}`
+          ),
+          () => { }
+        );
+      }
+      user.username = username || user.username;
+      user.bio = bio || user.bio;
+      user.avatar = avatar || user.avatar;
+      await user.save();
+    }
+    res
+      .status(200)
+      .json({ success: true, message: "User updated successfully" });
+    return;
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ success: false, message: "Internal server error" });
+    return;
+  }
+}
+
 export async function getUserProfile(
   req: Request,
   res: Response
