@@ -5,6 +5,7 @@ import jwt from "jsonwebtoken";
 export interface User extends Document {
   username: string;
   avatar: string;
+  bio?: string;
   email: string;
   password: string;
   verifyCode: number;
@@ -28,6 +29,9 @@ const userSchema: Schema<User> = new Schema({
     trim: true,
   },
   avatar: {
+    type: String,
+  },
+  bio: {
     type: String,
   },
   email: {
@@ -75,9 +79,7 @@ userSchema.methods.comparePassword = async function (
 ): Promise<boolean> {
   return await bcrypt.compare(password, this.password);
 };
-userSchema.methods.generateToken = async function (
-  password: string
-): Promise<string> {
+userSchema.methods.generateToken = async function (): Promise<string> {
   return await jwt.sign(
     { id: this._id },
     process.env.JWT_SECRET as string

@@ -4,7 +4,8 @@ export async function createUser(
   username: string,
   email: string,
   avatar: string,
-  password: string
+  password: string,
+  bio?: string,
 ): Promise<User> {
   if (!username || !email || !avatar || !password) {
     throw new Error("all fields are required");
@@ -17,6 +18,7 @@ export async function createUser(
     username,
     email,
     avatar,
+    bio,
     password: hashedPassword,
     verifyCode,
     verifiedCodeExpiry,

@@ -37,44 +37,48 @@ const upload = multer({
 router.post(
   "/register",
   upload.single("avatar"),
-  body("username")
+  [body("username")
     .isString()
     .withMessage("Username is required")
     .isLength({ min: 3 })
     .withMessage("Username must be at least 3 characters"),
+  body("bio")
+    .optional()
+    .isLength({ min: 10 })
+    .withMessage("bio must be at least 10 characters"),
   body("email").isEmail().withMessage("Email is required"),
   body("password")
     .isString()
     .withMessage("Password is required")
     .isLength({ min: 8 })
-    .withMessage("Password must be at least 8 characters"),
+    .withMessage("Password must be at least 8 characters")],
   AuthControllers.register
 );
 
 router.post(
   "/login",
-  body("email").isEmail().withMessage("Email is required"),
+  [body("email").isEmail().withMessage("Email is required"),
   body("password")
     .isString()
     .withMessage("Password is required")
     .isLength({ min: 8 })
-    .withMessage("Password must be at least 8 characters"),
+    .withMessage("Password must be at least 8 characters")],
   AuthControllers.login
 );
 
 router.post(
   "/verify-email/:id",
-  body("verifyCode")
+  [body("verifyCode")
     .isInt()
     .withMessage("Verification code is required")
     .isLength({ min: 6, max: 6 })
-    .withMessage("Verification code must be 6 characters long"),
+    .withMessage("Verification code must be 6 characters long")],
   AuthControllers.verifyEmail
 );
 
 router.post(
   "/change-password",
-  body("password")
+  [body("password")
     .isString()
     .withMessage("Password is required")
     .isLength({ min: 8 })
@@ -83,7 +87,7 @@ router.post(
     .isString()
     .withMessage("New password is required")
     .isLength({ min: 8 })
-    .withMessage("New Password must be at least 8 characters"),
+    .withMessage("New Password must be at least 8 characters")],
   auth,
   AuthControllers.changePassword
 );

@@ -12,6 +12,7 @@ import { Mail } from "./../services/mail.service";
 interface UserRequestBody {
   username: string;
   email: string;
+  bio?: string;
   avatar: Express.Multer.File;
   password: string;
 }
@@ -26,7 +27,7 @@ export async function register(
     return;
   }
   try {
-    const { username, email, password } = req.body;
+    const { username, email, password, bio } = req.body;
     const avatar = req.file?.filename as string;
     const userExist = await UserModel.findOne({ email });
     let user;
@@ -37,11 +38,12 @@ export async function register(
             __dirname,
             `/../../../src/public/avatars/${userExist.avatar}`
           ),
-          () => {}
+          () => { }
         );
         userExist.username = username;
         userExist.email = email;
         userExist.avatar = avatar;
+        userExist.bio = bio;
         const hashedPassword = await UserModel.hashPassword(password);
         userExist.password = hashedPassword;
         const verifyCode = Math.floor(100000 + Math.random() * 999999);
@@ -57,7 +59,7 @@ export async function register(
         return;
       }
     } else {
-      user = await createUser(username, email, avatar, password);
+      user = await createUser(username, email, avatar, password, bio);
     }
     let html = await fs.readFileSync(
       path.join(__dirname, "/../../../src/emails/template.html"),
@@ -206,6 +208,7 @@ export async function changePassword(
     const isPasswordMatch = await user.comparePassword(password);
     if (!isPasswordMatch) {
       res.status(400).json({ success: false, message: "Incorrect password" });
+      return;
     }
     const hashedPassword = await UserModel.hashPassword(new_password);
     user.password = hashedPassword;

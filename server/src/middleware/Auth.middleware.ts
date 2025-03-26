@@ -23,6 +23,7 @@ export async function auth(
     }
     req.user = user;
     next();
+    return;
   } catch (err) {
     console.log(err);
     res.status(401).json({ success: false, message: "Unauthorized" });
