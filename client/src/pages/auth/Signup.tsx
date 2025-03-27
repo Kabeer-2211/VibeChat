@@ -1,6 +1,7 @@
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -14,9 +15,8 @@ import { loginSchema } from "@/schemas/login";
 import { Button } from "@/components/ui/button";
 import { LoginImage } from "@/assets";
 import { Link } from "react-router-dom";
-import CustomInput from "@/components/form/input";
 
-const Login = () => {
+const Signup = () => {
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -39,20 +39,11 @@ const Login = () => {
           />
         </div>
         <div className="w-2/4 h-full px-20 flex flex-col justify-center relative">
-          <h1 className="scroll-m-20 text-4xl font-bold tracking-tight">Login to your Account</h1>
+          <h1 className="scroll-m-20 text-4xl font-bold tracking-tight">Register your Account</h1>
           <p className="leading-7 [&:not(:first-child)]:my-4">Share Moments, Not Just Texts</p>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-              <CustomInput
-                control={form.control}
-                label="Email"
-                name="email"
-                type="email"
-                placeholder="Enter Your Email"
-                hasFormDescription={true}
-                formDescription="Your email is not shared with anyone"
-              />
-              {/* <FormField
+              <FormField
                 control={form.control}
                 name="email"
                 render={({ field }) => (
@@ -67,7 +58,7 @@ const Login = () => {
                     <FormMessage />
                   </FormItem>
                 )}
-              /> */}
+              />
               <FormField
                 control={form.control}
                 name="password"
@@ -81,11 +72,11 @@ const Login = () => {
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="cursor-pointer">Login</Button>
+              <Button type="submit" className="cursor-pointer">Signup</Button>
             </form>
           </Form>
           <p className="self-center mt-5">
-            Not Registered Yet? <Link to="/signup" className="text-blue-500 underline">Create an Account</Link>
+            Already Have an Account? <Link to="/login" className="text-blue-500 underline">Login Here</Link>
           </p>
         </div>
       </div>
@@ -93,4 +84,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Signup;
