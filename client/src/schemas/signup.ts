@@ -2,11 +2,9 @@ import { z } from "zod";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 function checkFileType(file: File) {
-  console.log(file);
   if (file?.name) {
     const fileType = file.name.split(".").pop();
-    if (fileType === "png" || fileType === "jpg" || fileType === "jpeg")
-      return true;
+    return ["png", "jpg", "jpeg"].includes(fileType?.toLowerCase() || "");
   }
   return false;
 }
@@ -19,7 +17,7 @@ export const signupSchema = z.object({
     .max(200, "Bio must not exceed 200 characters")
     .nullable(),
   avatar: z
-    .any()
+    .instanceof(File)
     .refine((file) => checkFileType(file), {
       message: "only .jpg, .png, .jpeg formats are allowed",
     })

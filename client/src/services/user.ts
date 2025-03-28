@@ -1,15 +1,15 @@
 import axios from "@/config/axios.ts";
 import { ApiResponse } from "@/types/apiResponse.ts";
 
-interface UserData {
-  username: string;
-  email: string;
-  password: string;
-  avatar?: File;
-  bio?: string | null;
-}
+// interface UserData {
+//   username: string;
+//   email: string;
+//   password: string;
+//   avatar?: File;
+//   bio?: string | null;
+// }
 
-export const signup = async (data: UserData) =>
+export const signup = async (data: FormData) =>
   await axios.post<ApiResponse>("/api/auth/v1/register", data);
 
 export const login = async (data: { email: string; password: string }) =>

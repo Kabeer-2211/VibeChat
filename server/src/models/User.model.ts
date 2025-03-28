@@ -30,6 +30,7 @@ const userSchema: Schema<User> = new Schema({
   },
   avatar: {
     type: String,
+    default: 'user.png',
   },
   bio: {
     type: String,

@@ -1,3 +1,5 @@
+import { Control, FieldValues, Path } from "react-hook-form";
+
 import {
   FormControl,
   FormDescription,
@@ -8,7 +10,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea"
-import { Control, FieldValues, Path } from "react-hook-form";
 
 interface InputProps<T extends FieldValues> {
   control: Control<T>;
@@ -19,6 +20,7 @@ interface InputProps<T extends FieldValues> {
   hasFormDescription?: boolean;
   formDescription?: string;
   isTextarea?: boolean;
+  setImagePreview?: CallableFunction;
 }
 const CustomInput = <T extends FieldValues>({
   control,
@@ -29,6 +31,7 @@ const CustomInput = <T extends FieldValues>({
   placeholder,
   type = "text",
   isTextarea = false,
+  setImagePreview
 }: InputProps<T>) => {
   return (
     <FormField
@@ -45,7 +48,20 @@ const CustomInput = <T extends FieldValues>({
                 {...field}
               />
             ) : (
-              <Input type={type} placeholder={placeholder} {...field} />
+              type === 'file' ? <Input
+                type="file"
+                accept="image/png, image/jpg, image/jpeg"
+                onChange={(e) => {
+                  const files = e.target.files;
+                  if (files && files[0]) {
+                    field.onChange(files[0]);
+                    if (setImagePreview) {
+                      const url = URL.createObjectURL(files[0]);
+                      setImagePreview(url);
+                    }
+                  }
+                }}
+              /> : <Input type={type} placeholder={placeholder} {...field} />
             )}
           </FormControl>
           {hasFormDescription && (
