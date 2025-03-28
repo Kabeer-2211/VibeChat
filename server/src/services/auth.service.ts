@@ -7,7 +7,7 @@ export async function createUser(
   password: string,
   bio?: string,
 ): Promise<User> {
-  if (!username || !email || !avatar || !password) {
+  if (!username || !email || !password) {
     throw new Error("all fields are required");
   }
   const hashedPassword = await UserModel.hashPassword(password);

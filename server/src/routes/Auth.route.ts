@@ -67,7 +67,7 @@ router.post(
   AuthControllers.changePassword
 );
 
-router.post(
+router.put(
   "/update-user-info",
   uploadFile,
   [
