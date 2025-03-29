@@ -2,7 +2,7 @@ import { useState } from "react";
 
 import { z } from "zod";
 import { useForm } from "react-hook-form";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { AxiosError } from "axios";
 
 import { toast } from "sonner";
@@ -12,7 +12,7 @@ import { signupSchema } from "@/schemas/signup";
 import { Button } from "@/components/ui/button";
 import { LoginImage, UserImage } from "@/assets";
 import CustomInput from "@/components/form/Input";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { signup } from "@/services/user.ts";
 import { setToken } from "@/utils/user.ts";
 import { useAppDispatch, useAppSelector } from "@/hooks/redux.ts";
@@ -26,6 +26,7 @@ import { ApiResponse, User } from "@/types/apiResponse";
 import { LoaderCircle } from "lucide-react";
 
 const Signup = () => {
+  const navigate = useNavigate();
   const [imagePreview, setImagePreview] = useState<string>("");
   const dispatch = useAppDispatch();
   const user = useAppSelector((states) => states.user);
@@ -42,24 +43,24 @@ const Signup = () => {
     try {
       dispatch(beginAuthentication());
       const formData = new FormData();
-      formData.append('username', values.username);
-      formData.append('email', values.email);
-      formData.append('password', values.password);
-      formData.append('bio', values.bio || '');
+      formData.append("username", values.username);
+      formData.append("email", values.email);
+      formData.append("password", values.password);
+      formData.append("bio", values.bio || "");
       if (values.avatar) {
-        formData.append('avatar', values.avatar);
+        formData.append("avatar", values.avatar);
       }
       const { data } = await signup(formData);
-      console.log(values)
       if (data.success) {
-        console.log(data);
-        toast.success(data.message);
         dispatch(AuthSuccess(data.user as User));
         setToken(data.token as string);
+        navigate(`/verify-email/${data.user?._id}`);
       }
     } catch (err) {
       const axiosError = err as AxiosError<ApiResponse>;
-      toast.error(axiosError.response?.data.message || "Error in signing you up");
+      toast.error(
+        axiosError.response?.data.message || "Error in signing you up"
+      );
       dispatch(authFail());
     } finally {
       dispatch(authComplete());
@@ -68,7 +69,7 @@ const Signup = () => {
 
   return (
     <div className="w-screen h-screen flex justify-center items-center">
-      <div className="flex flex-col lg:flex-row align-items-center w-[80vw] lg:h-[80vh] max-w-[1400px] rounded-lg overflow-hidden border">
+      <div className="flex flex-col lg:flex-row align-items-center w-[80vw] lg:h-[90vh] max-w-[1400px] rounded-lg overflow-hidden border">
         <div className="w-full lg:w-2/4 h-full">
           <img
             src={LoginImage}
@@ -77,7 +78,7 @@ const Signup = () => {
           />
         </div>
         <div className="w-full lg:w-2/4 h-full px-10 lg:px-20 flex flex-col justify-center mt-8 lg:mt-0">
-          <div className="mx-auto mb-8 w-32 h-4w-32">
+          <div className="mx-auto mb-4 w-32">
             <Avatar className="w-full h-full">
               <AvatarImage src={imagePreview ? imagePreview : UserImage} />
               <AvatarFallback>Invalid Image</AvatarFallback>
