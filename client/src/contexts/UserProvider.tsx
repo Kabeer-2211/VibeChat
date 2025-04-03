@@ -8,11 +8,13 @@ import { useAppSelector, useAppDispatch } from "@/hooks/redux";
 import { beginAuthentication, authComplete, authFail, authSuccess } from '@/redux/slices/userSlice';
 import { ApiResponse, User } from '@/types/apiResponse';
 import { useError } from '@/hooks/useError';
+import { getToken } from '@/utils/user';
 
 const UserProvider = ({ children }: { children: React.ReactNode }) => {
     const user = useAppSelector(state => state.user);
     const dispatch = useAppDispatch();
     const { showError } = useError();
+    const token = getToken();
     useEffect(() => {
         async function getUserData() {
             dispatch(beginAuthentication());
@@ -29,10 +31,10 @@ const UserProvider = ({ children }: { children: React.ReactNode }) => {
                 dispatch(authComplete());
             }
         }
-        if (!user.username) {
+        if (!user.username && token) {
             getUserData();
         }
-    }, [showError, dispatch, user])
+    }, [showError, dispatch, user, token])
 
     return (
         <userContext.Provider value={null}>

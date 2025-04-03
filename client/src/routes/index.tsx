@@ -4,8 +4,8 @@ import Home from "@/pages/Home";
 import Login from "@/pages/auth/Login";
 import Signup from "@/pages/auth/Signup";
 import VerifyEmail from "@/pages/auth/VerifyEmail";
-import PublicRoute from "./PublicRoute";
-import PrivateRoute from "./PrivateRoute";
+import PublicRoute from "@/routes/PublicRoute";
+import PrivateRoute from "@/routes/PrivateRoute";
 
 const Router = () => {
   return (

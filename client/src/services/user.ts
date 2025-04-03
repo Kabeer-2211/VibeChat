@@ -15,10 +15,6 @@ export const changePassword = async (data: {
   new_password: string;
 }) => await axios.post<ApiResponse>("/api/auth/v1/change-password", data);
 
-export const updateUserInfo = async (data: {
-  username: string;
-  bio: string;
-  avatar: File;
-}) => await axios.put<ApiResponse>("/api/auth/v1/update-user-info", data);
+export const updateUserInfo = async (data: FormData) => await axios.put<ApiResponse>("/api/auth/v1/update-user-info", data);
 
 export const getUser = async () => await axios.get<ApiResponse>("/api/auth/v1/user/profile");

@@ -1,15 +1,22 @@
-import { useAppSelector } from "@/hooks/redux";
+import { useState } from "react"
+
+import Settings from "@/pages/settings";
+import ProfileInfo from "./settings/ProfileInfo";
+import { getToken } from "@/utils/user";
+import Sidebar from "@/components/Sidebar";
 
 const Home = () => {
-    const user = useAppSelector(state => state.user);
-    if (user.isLoading) {
-        return (<h1>Loading...</h1>)
-    }
+    const [page, setPage] = useState<string>("chats");
+    const isAuthenticated = Boolean(getToken());
+
     return (
-        <>
-            <img src={`${import.meta.env.VITE_BASE_URL}/avatars/${user?.avatar}`} alt="avatar" width={100} />
-            <h1>{user?.username}</h1>
-        </>
+        <div className="h-full flex max-w-[1500px] mx-auto">
+            {isAuthenticated && <Sidebar page={page} setPage={setPage} />}
+            <div className="w-[40%] lg:w-[30%] bg-[#FDFDFD] border-r border-l">
+                {page === 'settings' && <Settings setPage={setPage} />}
+                {page === 'userProfile' && <ProfileInfo />}
+            </div>
+        </div>
     )
 }
 

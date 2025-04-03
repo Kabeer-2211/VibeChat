@@ -234,6 +234,7 @@ export async function updateUserInfo(
     return;
   }
   try {
+    console.log(req.body)
     const { username, bio } = req.body;
     const avatar = req.file?.filename as string;
     let user = req.user;
@@ -263,7 +264,7 @@ export async function updateUserInfo(
     }
     res
       .status(200)
-      .json({ success: true, message: "User updated successfully" });
+      .json({ success: true, message: "User updated successfully", user });
     return;
   } catch (err) {
     console.log(err);

@@ -78,7 +78,7 @@ router.put(
     body("bio")
       .optional()
       .isLength({ min: 10 })
-      .withMessage("Bio must be at least 10 characters")
+      .withMessage("bio must be at least 10 characters")
   ],
   auth,
   AuthControllers.updateUserInfo

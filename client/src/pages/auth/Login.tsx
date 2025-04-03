@@ -96,7 +96,7 @@ const Login = () => {
           </Form>
           <p className="self-center mt-5">
             Not Registered Yet?
-            <Link to="/signup" className="text-blue-500 underline">
+            <Link to="/signup" className="text-blue-500 underline ms-2">
               Create an Account
             </Link>
           </p>
