@@ -2,15 +2,18 @@ import { BrowserRouter } from "react-router-dom";
 
 import Router from "@/routes";
 import Layout from "@/layout";
-import ErrorProvider from "./contexts/ErrorProvider";
+import ErrorProvider from "@/contexts/ErrorProvider";
+import UserProvider from "@/contexts/UserProvider";
 
 const App = () => {
   return (
     <BrowserRouter>
       <ErrorProvider>
-        <Layout>
-          <Router />
-        </Layout>
+        <UserProvider>
+          <Layout>
+            <Router />
+          </Layout>
+        </UserProvider>
       </ErrorProvider>
     </BrowserRouter>
   );
