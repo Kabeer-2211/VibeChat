@@ -5,7 +5,7 @@ export const signup = async (data: FormData) =>
   await axios.post<ApiResponse>("/api/auth/v1/register", data);
 
 export const login = async (data: { email: string; password: string }) =>
-  await axios.post("/api/auth/v1/login", data);
+  await axios.post<ApiResponse>("/api/auth/v1/login", data);
 
 export const verifyEmail = async (id: string, verifyCode: string) =>
   await axios.post<ApiResponse>(`/api/auth/v1/verify-email/${id}`, { verifyCode });

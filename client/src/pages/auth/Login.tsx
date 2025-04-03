@@ -1,15 +1,32 @@
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import { Form } from "@/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema } from "@/schemas/login";
 import { Button } from "@/components/ui/button";
+import { useError } from "@/hooks/useError";
+import { login } from "@/services/user";
+import { setToken } from "@/utils/user";
 import { LoginImage } from "@/assets";
 import CustomInput from "@/components/form/Input";
+import { useAppDispatch, useAppSelector } from "@/hooks/redux.ts";
+import {
+  beginAuthentication,
+  authFail,
+  authSuccess,
+  authComplete,
+} from "@/redux/slices/userSlice.ts";
+import { ApiResponse, User } from "@/types/apiResponse";
+import { LoaderCircle } from "lucide-react";
+import { AxiosError } from "axios";
 
 const Login = () => {
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  const { showError, showMessage } = useError();
+  const user = useAppSelector((states) => states.user);
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -17,8 +34,23 @@ const Login = () => {
       password: "",
     },
   });
-  function onSubmit(values: z.infer<typeof loginSchema>) {
-    console.log(values);
+  async function onSubmit(values: z.infer<typeof loginSchema>) {
+    try {
+      dispatch(beginAuthentication());
+      const { data } = await login(values);
+      if (data.success) {
+        dispatch(authSuccess(data.user as User));
+        setToken(data.token || "");
+        showMessage("User logged in successfully");
+        navigate('/');
+      }
+    } catch (err) {
+      const axiosError = err as AxiosError<ApiResponse>;
+      showError(axiosError.response?.data.message || "Error in signing you in");
+      dispatch(authFail());
+    } finally {
+      dispatch(authComplete());
+    }
   }
 
   return (
@@ -56,7 +88,8 @@ const Login = () => {
                 type="password"
                 placeholder="Enter Your Password"
               />
-              <Button type="submit" className="cursor-pointer">
+              <Button type="submit" className="cursor-pointer" disabled={user.isLoading}>
+                {user.isLoading && <LoaderCircle className="animate-spin" />}
                 Login
               </Button>
             </form>

@@ -24,7 +24,7 @@ export const userSlice = createSlice({
     beginAuthentication: (state): void => {
       state.isLoading = true;
     },
-    AuthSuccess: (
+    authSuccess: (
       state,
       action: PayloadAction<{
         username: string;
@@ -52,7 +52,7 @@ export const userSlice = createSlice({
   },
 });
 
-export const { beginAuthentication, AuthSuccess, authFail, authComplete } =
+export const { beginAuthentication, authSuccess, authFail, authComplete } =
   userSlice.actions;
 
 export default userSlice.reducer;
