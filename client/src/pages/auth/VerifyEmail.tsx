@@ -1,12 +1,10 @@
-import { useState } from "react";
-
 import { z } from "zod";
 import { useForm } from "react-hook-form";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { AxiosError } from "axios";
 
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
-import { FormControl, FormField, FormItem, FormMessage} from "@/components/ui/form";
+import { FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Form } from "@/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -14,14 +12,21 @@ import { Button } from "@/components/ui/button";
 import { LoginImage } from "@/assets";
 import { verifyEmailSchema } from "@/schemas/verifyEmail";
 import { verifyEmail } from "@/services/user.ts";
-import { setToken } from "@/utils/user.ts";
 import { ApiResponse } from "@/types/apiResponse";
 import { LoaderCircle, AlertCircle } from "lucide-react";
-import { toast } from "sonner";
+import { useError } from "@/hooks/useError";
+import { useAppDispatch, useAppSelector } from "@/hooks/redux.ts";
+import {
+  beginAuthentication,
+  authComplete,
+} from "@/redux/slices/userSlice.ts";
 
 const VerifyEmail = () => {
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const dispatch = useAppDispatch();
+  const { showError, showMessage } = useError();
+  const user = useAppSelector((states) => states.user);
   const { id } = useParams();
+  const navigate = useNavigate();
   const form = useForm<z.infer<typeof verifyEmailSchema>>({
     resolver: zodResolver(verifyEmailSchema),
     defaultValues: {
@@ -30,19 +35,18 @@ const VerifyEmail = () => {
   });
   async function onSubmit(values: z.infer<typeof verifyEmailSchema>) {
     try {
-      setIsLoading(true);
+      dispatch(beginAuthentication());
       const { data } = await verifyEmail(id || "", values.verifyCode);
       if (data.success) {
-        setToken(data.token as string);
-        window.location.href = "/";
+        dispatch(authComplete());
+        showMessage("You can now login to your account");
+        navigate('/login');
       }
     } catch (err) {
       const axiosError = err as AxiosError<ApiResponse>;
-      toast.error(
-        axiosError.response?.data.message || "Error in verifying you"
-      );
+      showError(axiosError.response?.data.message || "Error in verifying you")
     } finally {
-      setIsLoading(false);
+      dispatch(authComplete());
     }
   }
 
@@ -93,9 +97,9 @@ const VerifyEmail = () => {
               <Button
                 type="submit"
                 className="cursor-pointer"
-                disabled={isLoading}
+                disabled={user.isLoading}
               >
-                {isLoading && <LoaderCircle className="animate-spin" />}
+                {user.isLoading && <LoaderCircle className="animate-spin" />}
                 Verify
               </Button>
             </form>

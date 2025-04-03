@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { AxiosError } from "axios";
 
-import { toast } from "sonner";
+import { useError } from "@/hooks/useError";
 import { Form } from "@/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signupSchema } from "@/schemas/signup";
@@ -14,19 +14,18 @@ import { LoginImage, UserImage } from "@/assets";
 import CustomInput from "@/components/form/Input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { signup } from "@/services/user.ts";
-import { setToken } from "@/utils/user.ts";
 import { useAppDispatch, useAppSelector } from "@/hooks/redux.ts";
 import {
   beginAuthentication,
-  AuthSuccess,
   authFail,
   authComplete,
 } from "@/redux/slices/userSlice.ts";
-import { ApiResponse, User } from "@/types/apiResponse";
+import { ApiResponse } from "@/types/apiResponse";
 import { LoaderCircle } from "lucide-react";
 
 const Signup = () => {
   const navigate = useNavigate();
+  const { showError, showMessage } = useError();
   const [imagePreview, setImagePreview] = useState<string>("");
   const dispatch = useAppDispatch();
   const user = useAppSelector((states) => states.user);
@@ -52,15 +51,13 @@ const Signup = () => {
       }
       const { data } = await signup(formData);
       if (data.success) {
-        dispatch(AuthSuccess(data.user as User));
-        setToken(data.token as string);
+        dispatch(authComplete());
+        showMessage("Verify your email");
         navigate(`/verify-email/${data.user?._id}`);
       }
     } catch (err) {
       const axiosError = err as AxiosError<ApiResponse>;
-      toast.error(
-        axiosError.response?.data.message || "Error in signing you up"
-      );
+      showError(axiosError.response?.data.message || "Error in signing you up");
       dispatch(authFail());
     } finally {
       dispatch(authComplete());

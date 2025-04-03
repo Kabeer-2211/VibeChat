@@ -21,7 +21,7 @@ export const userSlice = createSlice({
   name: "user",
   initialState,
   reducers: {
-    beginAuthentication: (state) => {
+    beginAuthentication: (state): void => {
       state.isLoading = true;
     },
     AuthSuccess: (
@@ -32,21 +32,21 @@ export const userSlice = createSlice({
         avatar?: string;
         bio?: string;
       }>
-    ) => {
+    ): void => {
       state.username = action.payload.username;
       state.email = action.payload.email;
       state.avatar = action.payload.avatar;
       state.bio = action.payload.bio;
       state.isLoading = false;
     },
-    authFail: (state) => {
+    authFail: (state): void => {
       state.username = "";
       state.email = "";
       state.avatar = "";
       state.bio = "";
       state.isLoading = false;
     },
-    authComplete: (state) => {
+    authComplete: (state): void => {
       state.isLoading = false;
     },
   },

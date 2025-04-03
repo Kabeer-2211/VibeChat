@@ -8,7 +8,7 @@ export const login = async (data: { email: string; password: string }) =>
   await axios.post("/api/auth/v1/login", data);
 
 export const verifyEmail = async (id: string, verifyCode: string) =>
-  await axios.post(`/api/auth/v1/verify-email/${id}`, { verifyCode });
+  await axios.post<ApiResponse>(`/api/auth/v1/verify-email/${id}`, { verifyCode });
 
 export const changePassword = async (data: {
   password: string;
