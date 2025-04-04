@@ -1,7 +1,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@radix-ui/react-avatar';
 import { useAppSelector } from "@/hooks/redux";
 import { getAvatarName } from '@/helper/helper';
-import { LogOutIcon } from 'lucide-react';
+import { LogOutIcon, KeyRound } from 'lucide-react';
 import { deleteToken } from '@/utils/user';
 import { useNavigate } from 'react-router-dom';
 
@@ -20,6 +20,12 @@ const Settings = ({ setPage }: { setPage: CallableFunction }) => {
                     <p className='truncate'>{user.bio && user.bio?.length > 35 ? user.bio.substring(0, 35) + "..." : user.bio}</p>
                 </div>
             </button>
+            <div className='flex flex-col hover:bg-slate-100'>
+                <button className='px-5 py-3 flex items-center gap-6 cursor-pointer' onClick={() => setPage('userProfile')}>
+                    <KeyRound className='mb-2' />
+                    <span className='text-xl flex-grow border-b text-start pb-3'>Change Password</span>
+                </button>
+            </div>
             <div className='flex flex-col hover:bg-slate-100'>
                 <button className='px-5 py-3 flex items-center gap-6 text-red-600 cursor-pointer' onClick={() => {
                     deleteToken()

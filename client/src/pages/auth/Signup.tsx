@@ -8,7 +8,7 @@ import { AxiosError } from "axios";
 import { useError } from "@/hooks/useError";
 import { Form } from "@/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { signupSchema } from "@/schemas/signup";
+import { signupSchema } from "@/schemas/auth/signup";
 import { Button } from "@/components/ui/button";
 import { LoginImage, UserImage } from "@/assets";
 import CustomInput from "@/components/form/Input";

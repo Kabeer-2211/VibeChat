@@ -217,7 +217,7 @@ export async function changePassword(
     await user.save();
     res
       .status(200)
-      .json({ success: true, message: "password changed successfully" });
+      .json({ success: true, message: "password changed successfully", user });
     return;
   } catch (err) {
     console.log(err);

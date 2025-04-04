@@ -10,7 +10,7 @@ import { Form } from "@/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { LoginImage } from "@/assets";
-import { verifyEmailSchema } from "@/schemas/verifyEmail";
+import { verifyEmailSchema } from "@/schemas/auth/verifyEmail";
 import { verifyEmail } from "@/services/user.ts";
 import { ApiResponse } from "@/types/apiResponse";
 import { LoaderCircle, AlertCircle } from "lucide-react";
