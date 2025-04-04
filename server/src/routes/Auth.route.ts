@@ -88,6 +88,12 @@ router.put(
   AuthControllers.updateUserInfo
 );
 
+router.put(
+  "/delete-profile-picture",
+  auth,
+  AuthControllers.deleteProfilePicture
+);
+
 router.get("/user/profile", auth, AuthControllers.getUserProfile);
 
 export default router;

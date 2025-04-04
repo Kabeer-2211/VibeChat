@@ -274,6 +274,35 @@ export async function updateUserInfo(
   }
 }
 
+export async function deleteProfilePicture(
+  req: Request,
+  res: Response
+): Promise<void> {
+  try {
+    let user = req.user;
+    if (user.avatar !== 'user.png') {
+      fs.unlink(
+        path.join(
+          __dirname,
+          `/../../../src/public/avatars/${user.avatar}`
+        ),
+        () => { }
+      );
+    }
+    user = await UserModel.findById(user._id);
+    user.avatar = 'user.png';
+    await user.save();
+    res
+      .status(200)
+      .json({ success: true, message: "Profile picture deleted", user });
+    return;
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ success: false, message: "Internal server error" });
+    return;
+  }
+}
+
 export async function getUserProfile(
   req: Request,
   res: Response

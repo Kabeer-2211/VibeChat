@@ -17,4 +17,6 @@ export const changePassword = async (data: {
 
 export const updateUserInfo = async (data: FormData) => await axios.put<ApiResponse>("/api/auth/v1/update-user-info", data);
 
+export const deleteProfilePicture = async () => await axios.put<ApiResponse>("/api/auth/v1/delete-profile-picture");
+
 export const getUser = async () => await axios.get<ApiResponse>("/api/auth/v1/user/profile");

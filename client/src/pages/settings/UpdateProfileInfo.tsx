@@ -16,13 +16,14 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { ApiResponse } from '@/types/apiResponse';
 import { beginAuthentication, authSuccess, authComplete } from '@/redux/slices/userSlice';
 import { useError } from '@/hooks/useError';
-import { updateUserInfo } from '@/services/user';
+import { deleteProfilePicture, updateUserInfo } from '@/services/user';
 
 const UpdateProfileInfo = () => {
     const user = useAppSelector(state => state.user);
     const dispatch = useAppDispatch();
     const { showError, showMessage } = useError();
     const [avatar, setAvatar] = useState<string>(`${import.meta.env.VITE_BASE_URL}/avatars/${user?.avatar}`)
+    const [isLoading, setIsLoading] = useState<boolean>(false);
     const form = useForm<z.infer<typeof updateProfileSchema>>({
         resolver: zodResolver(updateProfileSchema),
         defaultValues: {
@@ -31,6 +32,23 @@ const UpdateProfileInfo = () => {
             avatar: null
         },
     });
+    async function deletePfp() {
+        try {
+            setIsLoading(true);
+            const { data } = await deleteProfilePicture();
+            if (data.success) {
+                if (data.user) {
+                    dispatch(authSuccess(data.user));
+                    setAvatar(`${import.meta.env.VITE_BASE_URL}/avatars/${data.user.avatar}`)
+                }
+            }
+        } catch (err) {
+            const axiosError = err as AxiosError<ApiResponse>;
+            showError(axiosError.response?.data.message || "Error in signing you up");
+        } finally {
+            setIsLoading(false);
+        }
+    }
     async function onSubmit(values: z.infer<typeof updateProfileSchema>) {
         try {
             dispatch(beginAuthentication());
@@ -58,7 +76,7 @@ const UpdateProfileInfo = () => {
     }
     return (
         <form onSubmit={form.handleSubmit(onSubmit)} className='flex flex-col items-center gap-5 py-10'>
-            <div className='relative group'>
+            <div className='relative flex flex-col gap-3 items-center group'>
                 <Avatar className="w-52 h-52">
                     <AvatarImage src={avatar} />
                     <AvatarFallback className='bg-[#625EF1] text-white w-full h-full flex items-center justify-center text-5xl'>{getAvatarName(user?.username)}</AvatarFallback>
@@ -76,6 +94,10 @@ const UpdateProfileInfo = () => {
                     }} />
                 </label>
                 <span className='text-red-600'>{form.formState.errors.avatar?.message}</span>
+                <Button variant="destructive" className='cursor-pointer' onClick={deletePfp} disabled={isLoading}>
+                    {isLoading && <LoaderCircle className="animate-spin" />}
+                    Delete Profile Picture
+                </Button>
             </div>
             <div className='w-full'>
                 <div className='mb-2'>Username</div>
@@ -87,7 +109,7 @@ const UpdateProfileInfo = () => {
                 <Textarea {...form.register("bio")} placeholder="Tell us a little bit about yourself" />
                 <span className='text-red-600'>{form.formState.errors.bio?.message}</span>
             </div>
-            <Button className='cursor-pointer self-end'>
+            <Button className='cursor-pointer self-end' disabled={user.isLoading}>
                 {user.isLoading && <LoaderCircle className="animate-spin" />}
                 Save Changes
             </Button>
