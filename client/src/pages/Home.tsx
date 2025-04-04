@@ -16,6 +16,8 @@ const Home = () => {
                 {page === 'settings' && <Settings setPage={setPage} />}
                 {page === 'userProfile' && <ProfileInfo />}
             </div>
+            <div className="w-[60%] lg:w-[70%] bg-white">
+            </div>
         </div>
     )
 }

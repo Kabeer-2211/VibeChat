@@ -18,9 +18,11 @@ router.post(
     .isLength({ min: 3 })
     .withMessage("Username must be at least 3 characters"),
   body("bio")
-    .optional()
     .isLength({ min: 10 })
-    .withMessage("bio must be at least 10 characters"),
+    .withMessage("Bio must be at least 10 characters")
+    .optional({
+      values: 'falsy'
+    }),
   body("email").isEmail().withMessage("Email is required"),
   body("password")
     .isString()
@@ -72,13 +74,15 @@ router.put(
   uploadFile,
   [
     body("username")
-      .optional()
       .isLength({ min: 3 })
-      .withMessage("Username must be at least 3 characters"),
+      .withMessage("Username must be at least 3 characters")
+      .optional(),
     body("bio")
-      .optional()
       .isLength({ min: 10 })
-      .withMessage("bio must be at least 10 characters")
+      .withMessage("Bio must be at least 10 characters")
+      .optional({
+        values: 'falsy'
+      })
   ],
   auth,
   AuthControllers.updateUserInfo

@@ -33,13 +33,15 @@ export async function register(
     let user;
     if (userExist) {
       if (!userExist.isVerified) {
-        fs.unlink(
-          path.join(
-            __dirname,
-            `/../../../src/public/avatars/${userExist.avatar}`
-          ),
-          () => { }
-        );
+        if (userExist.avatar !== 'user.png') {
+          fs.unlink(
+            path.join(
+              __dirname,
+              `/../../../src/public/avatars/${userExist.avatar}`
+            ),
+            () => { }
+          );
+        }
         userExist.username = username;
         userExist.email = email;
         userExist.avatar = avatar;
@@ -234,7 +236,6 @@ export async function updateUserInfo(
     return;
   }
   try {
-    console.log(req.body)
     const { username, bio } = req.body;
     const avatar = req.file?.filename as string;
     let user = req.user;
@@ -248,7 +249,7 @@ export async function updateUserInfo(
       return;
     }
     if (username || bio || avatar) {
-      if (avatar) {
+      if (avatar && user.avatar !== 'user.png') {
         fs.unlink(
           path.join(
             __dirname,
@@ -258,7 +259,7 @@ export async function updateUserInfo(
         );
       }
       user.username = username || user.username;
-      user.bio = bio || user.bio;
+      user.bio = bio || "";
       user.avatar = avatar || user.avatar;
       await user.save();
     }

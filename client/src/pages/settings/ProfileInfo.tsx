@@ -1,6 +1,9 @@
 import { useState } from 'react'
 
 import { z } from 'zod';
+import { useForm } from 'react-hook-form';
+import { AxiosError } from 'axios';
+import { LoaderCircle, Camera } from "lucide-react";
 
 import { useAppSelector, useAppDispatch } from '@/hooks/redux';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -8,12 +11,8 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { getAvatarName } from '@/helper/helper';
-import { Camera } from 'lucide-react';
-import { LoaderCircle } from "lucide-react";
-import { useForm } from 'react-hook-form';
 import { updateProfileSchema } from '@/schemas/updateProfile';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { AxiosError } from 'axios';
 import { ApiResponse, User } from '@/types/apiResponse';
 import { beginAuthentication, authSuccess, authComplete, authFail } from '@/redux/slices/userSlice';
 import { useError } from '@/hooks/useError';
@@ -29,6 +28,7 @@ const ProfileInfo = () => {
         defaultValues: {
             username: user.username,
             bio: user.bio,
+            avatar: null
         },
     });
     async function onSubmit(values: z.infer<typeof updateProfileSchema>) {
@@ -36,11 +36,12 @@ const ProfileInfo = () => {
             dispatch(beginAuthentication());
             const formData = new FormData();
             formData.append('username', values.username);
-            formData.append('bio', values.username);
+            if (values.bio) {
+                formData.append('bio', values.bio);
+            }
             if (values.avatar) {
                 formData.append('avatar', values.avatar)
             }
-            console.log(values)
             const { data } = await updateUserInfo(formData);
             if (data.success) {
                 dispatch(authSuccess(data.user as User));
@@ -68,8 +69,8 @@ const ProfileInfo = () => {
                         const files = e.target.files;
                         if (files && files[0]) {
                             const url = URL.createObjectURL(files[0]);
-                            setAvatar(url)
-                            form.setValue('avatar', files[0])
+                            setAvatar(url);
+                            form.setValue('avatar', files[0]);
                         }
                     }} />
                 </label>
@@ -77,12 +78,12 @@ const ProfileInfo = () => {
             </div>
             <div className='w-full'>
                 <div className='mb-2'>Username</div>
-                <Input {...form.register("username")} />
+                <Input {...form.register("username")} placeholder="Enter Full Name" />
                 <span className='text-red-600'>{form.formState.errors.username?.message}</span>
             </div>
             <div className='w-full'>
                 <div className='mb-2'>Bio</div>
-                <Textarea {...form.register("bio")} />
+                <Textarea {...form.register("bio")} placeholder="Tell us a little bit about yourself" />
                 <span className='text-red-600'>{form.formState.errors.bio?.message}</span>
             </div>
             <Button className='cursor-pointer self-end'>

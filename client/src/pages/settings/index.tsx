@@ -11,7 +11,7 @@ const Settings = ({ setPage }: { setPage: CallableFunction }) => {
     return (
         <div>
             <button className='w-full flex items-center gap-5 p-5 hover:bg-slate-100 cursor-pointer' onClick={() => setPage('userProfile')}>
-                <Avatar className="w-24 border rounded-full overflow-hidden">
+                <Avatar className="w-24 h-24 border rounded-full overflow-hidden">
                     <AvatarImage src={`${import.meta.env.VITE_BASE_URL}/avatars/${user?.avatar}`} />
                     <AvatarFallback className='bg-[#625EF1] text-white w-full h-full flex items-center justify-center text-2xl'>{getAvatarName(user?.username)}</AvatarFallback>
                 </Avatar>

@@ -15,7 +15,8 @@ export const updateProfileSchema = z.object({
     .string()
     .min(10, "Bio must be at least 10 characters")
     .max(200, "Bio must not exceed 200 characters")
-    .nullable(),
+    .optional()
+    .or(z.literal('')),
   avatar: z
     .instanceof(File)
     .refine((file) => checkFileType(file), {
@@ -24,5 +25,5 @@ export const updateProfileSchema = z.object({
     .refine((file) => file.size <= MAX_FILE_SIZE, {
       message: "File size should not exceed 5MB",
     })
-    .optional(),
+    .nullable()
 });
