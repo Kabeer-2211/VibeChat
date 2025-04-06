@@ -4,8 +4,14 @@ import path from "path";
 import { Request, Response } from "express";
 import { validationResult } from "express-validator";
 
-import { ApiResponse } from "./../types/ApiResponse";
-import { createUser } from "./../services/auth.service";
+import {
+  createUser,
+  searchUser,
+  verifyUser,
+  changeUserPassword,
+  updateUserProfile,
+  deleteUserProfilePicture,
+} from "./../services/auth.service";
 import UserModel from "../models/User.model";
 import { Mail } from "./../services/mail.service";
 
@@ -19,7 +25,7 @@ interface UserRequestBody {
 
 export async function register(
   req: Request<{}, {}, UserRequestBody>,
-  res: Response<ApiResponse>
+  res: Response
 ): Promise<void> {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -33,13 +39,13 @@ export async function register(
     let user;
     if (userExist) {
       if (!userExist.isVerified) {
-        if (userExist.avatar !== 'user.png') {
+        if (userExist.avatar !== "user.png") {
           fs.unlink(
             path.join(
               __dirname,
               `/../../../src/public/avatars/${userExist.avatar}`
             ),
-            () => { }
+            () => {}
           );
         }
         userExist.username = username;
@@ -86,7 +92,7 @@ export async function register(
 
 export async function login(
   req: Request<{}, {}, { email: string; password: string }>,
-  res: Response<ApiResponse>
+  res: Response
 ): Promise<void> {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -138,7 +144,7 @@ export async function login(
 
 export async function verifyEmail(
   req: Request<{ id: string }, {}, { verifyCode: Number }>,
-  res: Response<ApiResponse>
+  res: Response
 ): Promise<void> {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -148,38 +154,8 @@ export async function verifyEmail(
   try {
     const { verifyCode } = req.body;
     const { id } = req.params;
-    const user = await UserModel.findById(id).select([
-      "+verifyCode",
-      "+verifiedCodeExpiry",
-    ]);
-    if (!user) {
-      res.status(400).json({ success: false, message: "user does not exist" });
-      return;
-    }
-    if (user.isVerified) {
-      res
-        .status(400)
-        .json({ success: false, message: "user already verified" });
-      return;
-    }
-    if (verifyCode != user.verifyCode) {
-      res
-        .status(400)
-        .json({ success: false, message: "Invalid verification code" });
-      return;
-    }
-    const expiryDate = user.verifiedCodeExpiry;
-    const currentDate = new Date();
-    if (expiryDate < currentDate) {
-      res
-        .status(400)
-        .json({ success: false, message: "verification code expired" });
-      return;
-    }
-    user.isVerified = true;
-    await user.save();
+    const user = await verifyUser(id, verifyCode);
     const token = await user.generateToken();
-
     res.status(200).json({
       success: true,
       message: "user verified successfully",
@@ -189,7 +165,8 @@ export async function verifyEmail(
     return;
   } catch (err) {
     console.log(err);
-    res.status(500).json({ success: false, message: "an error occurred" });
+    const error = err as Error;
+    res.status(400).json({ success: false, message: error.message });
     return;
   }
 }
@@ -206,28 +183,25 @@ export async function changePassword(
   try {
     const { password, new_password } = req.body;
     let user = req.user;
-    user = await UserModel.findById(user._id).select("+password");
-    const isPasswordMatch = await user.comparePassword(password);
-    if (!isPasswordMatch) {
-      res.status(400).json({ success: false, message: "Incorrect password" });
-      return;
-    }
-    const hashedPassword = await UserModel.hashPassword(new_password);
-    user.password = hashedPassword;
-    await user.save();
+    user = await changeUserPassword(user._id, password, new_password);
     res
       .status(200)
       .json({ success: true, message: "password changed successfully", user });
     return;
   } catch (err) {
     console.log(err);
-    res.status(500).json({ success: false, message: "Internal server error" });
+    const error = err as Error;
+    res.status(400).json({ success: false, message: error.message });
     return;
   }
 }
 
 export async function updateUserInfo(
-  req: Request<{}, {}, { username?: string; bio?: string, avatar?: Express.Multer.File }>,
+  req: Request<
+    {},
+    {},
+    { username?: string; bio?: string; avatar?: Express.Multer.File }
+  >,
   res: Response
 ): Promise<void> {
   const errors = validationResult(req);
@@ -239,37 +213,15 @@ export async function updateUserInfo(
     const { username, bio } = req.body;
     const avatar = req.file?.filename as string;
     let user = req.user;
-    user = await UserModel.findById(user._id);
-    if (!user) {
-      res.status(400).json({ success: false, message: "User does not exist" });
-      return;
-    }
-    if (!user.isVerified) {
-      res.status(400).json({ success: false, message: "User not verified" });
-      return;
-    }
-    if (username || bio || avatar) {
-      if (avatar && user.avatar !== 'user.png') {
-        fs.unlink(
-          path.join(
-            __dirname,
-            `/../../../src/public/avatars/${user.avatar}`
-          ),
-          () => { }
-        );
-      }
-      user.username = username || user.username;
-      user.bio = bio || "";
-      user.avatar = avatar || user.avatar;
-      await user.save();
-    }
+    user = await updateUserProfile(user._id, username, bio, avatar);
     res
       .status(200)
       .json({ success: true, message: "User updated successfully", user });
     return;
   } catch (err) {
     console.log(err);
-    res.status(500).json({ success: false, message: "Internal server error" });
+    const error = err as Error;
+    res.status(400).json({ success: false, message: error.message });
     return;
   }
 }
@@ -280,25 +232,15 @@ export async function deleteProfilePicture(
 ): Promise<void> {
   try {
     let user = req.user;
-    if (user.avatar !== 'user.png') {
-      fs.unlink(
-        path.join(
-          __dirname,
-          `/../../../src/public/avatars/${user.avatar}`
-        ),
-        () => { }
-      );
-    }
-    user = await UserModel.findById(user._id);
-    user.avatar = 'user.png';
-    await user.save();
+    user = await deleteUserProfilePicture(user);
     res
       .status(200)
       .json({ success: true, message: "Profile picture deleted", user });
     return;
   } catch (err) {
     console.log(err);
-    res.status(500).json({ success: false, message: "Internal server error" });
+    const error = err as Error;
+    res.status(400).json({ success: false, message: error.message });
     return;
   }
 }
@@ -316,6 +258,35 @@ export async function getUserProfile(
   } catch (err) {
     console.log(err);
     res.status(500).json({ success: false, message: "Internal server error" });
+    return;
+  }
+}
+
+export async function getUsers(
+  req: Request<{}, {}, {}, { query: string }>,
+  res: Response
+): Promise<void> {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    res.status(400).json({ success: false, message: errors.array()[0].msg });
+    return;
+  }
+  try {
+    const { query } = req.query;
+    let users;
+    if (query) {
+      users = await searchUser(query);
+    } else {
+      users = await UserModel.find().limit(30);
+    }
+    res
+      .status(200)
+      .json({ success: true, message: "Users retrieved successfully", users });
+    return;
+  } catch (err) {
+    console.log(err);
+    const error = err as Error;
+    res.status(400).json({ success: false, message: error.message });
     return;
   }
 }

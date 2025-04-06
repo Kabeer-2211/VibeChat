@@ -30,7 +30,7 @@ const userSchema: Schema<User> = new Schema({
   },
   avatar: {
     type: String,
-    default: 'user.png',
+    default: "user.png",
   },
   bio: {
     type: String,
@@ -81,10 +81,7 @@ userSchema.methods.comparePassword = async function (
   return await bcrypt.compare(password, this.password);
 };
 userSchema.methods.generateToken = async function (): Promise<string> {
-  return await jwt.sign(
-    { id: this._id },
-    process.env.JWT_SECRET as string
-  );
+  return await jwt.sign({ id: this._id }, process.env.JWT_SECRET as string);
 };
 
 const UserModel = mongoose.model<User, UserModel>("User", userSchema);

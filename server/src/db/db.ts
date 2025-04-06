@@ -2,7 +2,9 @@ import mongoose from "mongoose";
 
 const connect = (): void => {
   mongoose
-    .connect(process.env.MONGODB_URI as string)
+    .connect(process.env.MONGODB_URI as string, {
+      autoIndex: false,
+    })
     .then(() => {
       console.log("database connected");
     })
