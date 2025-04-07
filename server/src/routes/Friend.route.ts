@@ -7,15 +7,21 @@ import * as friendController from "../controllers/Friend.controller";
 const router = Router();
 
 router.post(
-  "/change-status",
+  "/add-friend-request",
   [
     body("friendId").isString().withMessage("Friend id is required"),
-    body("status").optional({
-      values: "falsy",
-    }),
   ],
   auth,
-  friendController.changeFriendStatus
+  friendController.createFriend
+);
+
+router.put(
+  "/accept-friend-request/:id",
+  [
+    param("id").isString().withMessage("id is required"),
+  ],
+  auth,
+  friendController.acceptFriend
 );
 
 router.delete(

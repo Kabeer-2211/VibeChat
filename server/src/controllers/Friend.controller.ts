@@ -2,12 +2,13 @@ import { Request, Response } from "express";
 import { validationResult } from "express-validator";
 
 import {
-  changeFriendShipStatus,
+  createFriendRequest,
+  acceptFriendRequest,
   removeFriend,
   getUserFriends,
 } from "../services/friend.service";
 
-export async function changeFriendStatus(
+export async function createFriend(
   req: Request,
   res: Response
 ): Promise<void> {
@@ -17,12 +18,35 @@ export async function changeFriendStatus(
     return;
   }
   try {
-    const { friendId, status } = req.body;
+    const { friendId } = req.body;
     const user = req.user;
-    const friend = await changeFriendShipStatus(user.id, friendId, status);
+    const friend = await createFriendRequest(user._id, friendId);
     res
       .status(200)
-      .json({ success: true, message: "Friend status updated", friend });
+      .json({ success: true, message: "Friend request added", friend });
+    return;
+  } catch (err) {
+    const error = err as Error;
+    res.status(400).json({ success: false, message: error.message });
+    return;
+  }
+}
+
+export async function acceptFriend(
+  req: Request<{ id: string }>,
+  res: Response
+): Promise<void> {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    res.status(400).json({ success: false, message: errors.array()[0].msg });
+    return;
+  }
+  try {
+    const { id } = req.params;
+    const friend = await acceptFriendRequest(id);
+    res
+      .status(200)
+      .json({ success: true, message: "Friend request accepted", friend });
     return;
   } catch (err) {
     const error = err as Error;
