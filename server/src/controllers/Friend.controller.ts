@@ -6,6 +6,8 @@ import {
   acceptFriendRequest,
   removeFriend,
   getUserFriends,
+  blockFriend as block,
+  unBlockFriend as unBlock,
 } from "../services/friend.service";
 
 export async function createFriend(
@@ -47,6 +49,54 @@ export async function acceptFriend(
     res
       .status(200)
       .json({ success: true, message: "Friend request accepted", friend });
+    return;
+  } catch (err) {
+    const error = err as Error;
+    res.status(400).json({ success: false, message: error.message });
+    return;
+  }
+}
+
+export async function blockFriend(
+  req: Request<{ id: string }>,
+  res: Response
+): Promise<void> {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    res.status(400).json({ success: false, message: errors.array()[0].msg });
+    return;
+  }
+  try {
+    const { id } = req.params;
+    const user = req.user;
+    const friend = await block(id, user._id);
+    res
+      .status(200)
+      .json({ success: true, message: "Friend blocked successfully", friend });
+    return;
+  } catch (err) {
+    const error = err as Error;
+    res.status(400).json({ success: false, message: error.message });
+    return;
+  }
+}
+
+export async function unBlockFriend(
+  req: Request<{ id: string }>,
+  res: Response
+): Promise<void> {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    res.status(400).json({ success: false, message: errors.array()[0].msg });
+    return;
+  }
+  try {
+    const { id } = req.params;
+    const user = req.user;
+    const friend = await unBlock(id, user._id);
+    res
+      .status(200)
+      .json({ success: true, message: "Friend unblocked successfully", friend });
     return;
   } catch (err) {
     const error = err as Error;

@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { mongo } from "mongoose";
 
 import FriendModel, { Friend } from "../models/Friend.model";
 import UserModel from "../models/User.model";
@@ -20,8 +20,8 @@ export async function createFriendRequest(
   if (!userExist) {
     throw new Error("Requested user does not exist");
   }
-  const friendExist = await FriendModel.find({ $or: [{ userId, friendId }, { userId: friendId, friendId: userId }] });
-  if (friendExist[0]) {
+  const friendExist = await FriendModel.findOne({ $or: [{ userId, friendId }, { userId: friendId, friendId: userId }] });
+  if (friendExist) {
     throw new Error("Friend already exist")
   }
   const friend = await FriendModel.create({ userId, friendId, status: "pending" });
@@ -49,6 +49,67 @@ export async function acceptFriendRequest(
   return friend;
 }
 
+export async function blockFriend(
+  id: string,
+  userId: string,
+): Promise<Friend> {
+  if (!id || !userId) {
+    throw new Error("Some arguments are missing");
+  }
+  if (!mongoose.isValidObjectId(id) || !mongoose.isValidObjectId(userId)) {
+    throw new Error("some id invalid");
+  }
+  const friend = await FriendModel.findById(id);
+  if (!friend) {
+    throw new Error("Friend does not exist");
+  }
+  const fromUserId = new mongoose.Types.ObjectId(userId);
+  if (fromUserId.equals(friend.friendId)) {
+    if (friend.status === "blocked_to") {
+      friend.status = "blocked_both";
+    } else {
+      friend.status = "blocked_from";
+    }
+  } else if (fromUserId.equals(friend.userId)) {
+    if (friend.status === "blocked_from") {
+      friend.status = "blocked_both";
+    } else {
+      friend.status = "blocked_to";
+    }
+  }
+  await friend.save();
+  return friend;
+}
+
+export async function unBlockFriend(
+  id: string,
+  userId: string,
+): Promise<Friend> {
+  if (!id || !userId) {
+    throw new Error("Some arguments are missing");
+  }
+  if (!mongoose.isValidObjectId(id) || !mongoose.isValidObjectId(userId)) {
+    throw new Error("some id invalid");
+  }
+  const friend = await FriendModel.findOne({ $or: [{ friendId: id, userId }, { friendId: userId, userId: id }] });
+  if (!friend) {
+    throw new Error("Friend does not exist");
+  }
+  const validUserId = new mongoose.Types.ObjectId(userId);
+  const validFriendId = new mongoose.Types.ObjectId(id);
+  if (validUserId.equals(friend.userId)) {
+    if (friend.status === 'blocked_to') {
+      friend.status = "accepted"
+    }
+  } else if (validUserId.equals(friend.friendId)) {
+    if (friend.status === 'blocked_from') {
+      friend.status = "accepted"
+    }
+  }
+  await friend.save();
+  return friend;
+}
+
 
 export async function removeFriend(
   id: string,
@@ -57,16 +118,16 @@ export async function removeFriend(
   if (!mongoose.isValidObjectId(friendId)) {
     throw new Error("Invalid friend id");
   }
-  const friendship = await FriendModel.find({
+  const friendship = await FriendModel.findOne({
     $or: [
       { userId: id, friendId },
       { userId: friendId, friendId: id },
     ],
   });
-  if (!friendship[0]) {
+  if (!friendship) {
     throw new Error("Friend does not exist");
   }
-  if (friendship[0].status !== "accepted") {
+  if (friendship.status !== "accepted") {
     throw new Error("Invalid Request");
   }
   await FriendModel.deleteOne({

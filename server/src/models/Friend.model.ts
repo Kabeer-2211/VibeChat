@@ -1,8 +1,8 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 export interface Friend extends Document {
-  userId: mongoose.Schema.Types.ObjectId;
-  friendId: mongoose.Schema.Types.ObjectId;
+  userId: mongoose.Types.ObjectId;
+  friendId: mongoose.Types.ObjectId;
   status: string;
   createdAt: Date;
 }

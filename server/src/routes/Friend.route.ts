@@ -24,6 +24,24 @@ router.put(
   friendController.acceptFriend
 );
 
+router.put(
+  "/block-user/:id",
+  [
+    param("id").isString().withMessage("id is required")
+  ],
+  auth,
+  friendController.blockFriend
+);
+
+router.put(
+  "/unblock-user/:id",
+  [
+    param("id").isString().withMessage("id is required")
+  ],
+  auth,
+  friendController.unBlockFriend
+);
+
 router.delete(
   "/delete-friend/:id",
   param("id").isString().withMessage("user id is required"),
