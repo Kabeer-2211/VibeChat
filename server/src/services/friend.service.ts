@@ -96,7 +96,6 @@ export async function unBlockFriend(
     throw new Error("Friend does not exist");
   }
   const validUserId = new mongoose.Types.ObjectId(userId);
-  const validFriendId = new mongoose.Types.ObjectId(id);
   if (validUserId.equals(friend.userId)) {
     if (friend.status === 'blocked_to') {
       friend.status = "accepted"

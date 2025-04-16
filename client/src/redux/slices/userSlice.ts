@@ -2,6 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 
 interface UserState {
+  _id: string;
   username: string;
   email: string;
   avatar: string | undefined;
@@ -10,6 +11,7 @@ interface UserState {
 }
 
 const initialState: UserState = {
+  _id: "",
   username: "",
   email: "",
   avatar: "",
@@ -27,12 +29,14 @@ export const userSlice = createSlice({
     authSuccess: (
       state,
       action: PayloadAction<{
+        _id: string;
         username: string;
         email: string;
         avatar?: string;
         bio?: string;
       }>
     ): void => {
+      state._id = action.payload._id;
       state.username = action.payload.username;
       state.email = action.payload.email;
       state.avatar = action.payload.avatar;
@@ -40,6 +44,7 @@ export const userSlice = createSlice({
       state.isLoading = false;
     },
     authFail: (state): void => {
+      state._id = "";
       state.username = "";
       state.email = "";
       state.avatar = "";

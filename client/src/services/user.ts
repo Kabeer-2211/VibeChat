@@ -20,3 +20,5 @@ export const updateUserInfo = async (data: FormData) => await axios.put<ApiRespo
 export const deleteProfilePicture = async () => await axios.put<ApiResponse>("/api/auth/v1/delete-profile-picture");
 
 export const getUser = async () => await axios.get<ApiResponse>("/api/auth/v1/user/profile");
+
+export const getUsers = async (query: string) => await axios.get<ApiResponse>("/api/auth/v1/get-users?query=" + query);

@@ -8,10 +8,20 @@ export interface User {
   isOnline: boolean;
   createdAt: Date;
 }
+export interface Friend {
+  _id: string;
+  userId: User;
+  friendId: User;
+  status: string;
+  createdAt: Date;
+}
 
 export interface ApiResponse {
   success: boolean;
   message: string;
   token?: string;
   user?: User;
+  users?: [User];
+  friend?: Friend;
+  friends?: [Friend];
 }

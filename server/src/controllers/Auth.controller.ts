@@ -45,7 +45,7 @@ export async function register(
               __dirname,
               `/../../../src/public/avatars/${userExist.avatar}`
             ),
-            () => {}
+            () => { }
           );
         }
         userExist.username = username;
