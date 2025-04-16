@@ -24,7 +24,6 @@ const Friends = () => {
     async function fetchFriends() {
       try {
         const { data } = await getFriends();
-        console.log(data)
         if (data.success) {
           setFriends(data.friends)
         }
@@ -39,7 +38,6 @@ const Friends = () => {
     async function searchUsers(): Promise<void> {
       try {
         const { data } = await getUsers(debouncedQuery.toString());
-        console.log(data)
         if (data.success) {
           setUsers(data.users)
         }
@@ -50,6 +48,8 @@ const Friends = () => {
     }
     if (debouncedQuery) {
       searchUsers();
+    } else {
+      setUsers(undefined);
     }
   }, [debouncedQuery, showError])
   return (
@@ -58,7 +58,7 @@ const Friends = () => {
         setQuery(e.target.value)
       }} />
       <div className='flex-grow'>
-        <div className={`${collapse ? 'h-2/4 overflow-y-auto' : 'h-4/5 overflow-hidden'} transition-all duration-300`}>
+        <div className={`${collapse ? 'h-2/4' : 'h-4/5'} overflow-y-auto transition-all duration-300`}>
           {debouncedQuery && <h5 className='p-2 text-lg'><span className='font-semibold'>Search Results For:</span> {debouncedQuery}</h5>}
           {
             users && users.map((user) => <AddFriend key={user._id} imageUrl={user.avatar} imageFallback={getAvatarName(user.username)} username={user.username} email={user.email} />)
@@ -69,7 +69,7 @@ const Friends = () => {
           {
             friends && friends.map((friend) => {
               const friendId = friend.userId._id === user._id ? friend.friendId : friend.userId;
-              return <AddFriend key={friend._id} imageUrl={friendId.avatar} imageFallback={getAvatarName(friendId.username)} username={friendId.username} email={friendId.email} isAdded={true} />
+              return <AddFriend key={friend._id} imageUrl={friendId.avatar} imageFallback={getAvatarName(friendId.username)} username={friendId.username} email={friendId.email} isAdded={true} showUnfriendIcon={true} />
             })
           }
         </div>

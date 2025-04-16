@@ -273,9 +273,10 @@ export async function getUsers(
   }
   try {
     const { query } = req.query;
+    const user = req.user;
     let users;
     if (query) {
-      users = await searchUser(query);
+      users = await searchUser(query, user._id);
     } else {
       users = await UserModel.find().limit(30);
     }

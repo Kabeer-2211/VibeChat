@@ -4,6 +4,7 @@ import path from "path";
 import mongoose from "mongoose";
 
 import UserModel, { User } from "../models/User.model";
+import FriendModel from "../models/Friend.model";
 
 export async function createUser(
   username: string,
@@ -100,7 +101,7 @@ export async function updateUserProfile(
     if (avatar && user.avatar !== "user.png") {
       fs.unlink(
         path.join(__dirname, `/../../../src/public/avatars/${user.avatar}`),
-        () => {}
+        () => { }
       );
     }
     user.username = username || user.username;
@@ -115,7 +116,7 @@ export async function deleteUserProfilePicture(user: User): Promise<User> {
   if (user.avatar !== "user.png") {
     fs.unlink(
       path.join(__dirname, `/../../../src/public/avatars/${user.avatar}`),
-      () => {}
+      () => { }
     );
   }
   const newUser = await UserModel.findById(user._id);
@@ -127,11 +128,19 @@ export async function deleteUserProfilePicture(user: User): Promise<User> {
   return newUser;
 }
 
-export async function searchUser(query: string): Promise<User[]> {
+export async function searchUser(query: string, id: string): Promise<User[]> {
   if (!query) {
     throw new Error("query is required");
   }
+  const friends = await FriendModel.find({ $or: [{ userId: id }, { friendId: id }] });
+  const excludeIds = new Set();
+  friends.map(item => {
+    if (item.friendId) excludeIds.add(item.friendId.toString());
+    if (item.userId) excludeIds.add(item.userId.toString());
+  });
   const users = await UserModel.find({
+    _id: { $nin: Array.from(excludeIds) },
+    isVerified: true,
     $or: [{ email: query }, { $text: { $search: query } }],
   }).limit(30);
   return users;
