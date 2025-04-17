@@ -4,16 +4,19 @@ import Router from "@/routes";
 import Layout from "@/layout";
 import ErrorProvider from "@/contexts/ErrorProvider";
 import UserProvider from "@/contexts/UserProvider";
+import FriendProvider from "./contexts/FriendProvider";
 
 const App = () => {
   return (
     <BrowserRouter>
       <ErrorProvider>
-        <UserProvider>
-          <Layout>
-            <Router />
-          </Layout>
-        </UserProvider>
+        <FriendProvider>
+          <UserProvider>
+            <Layout>
+              <Router />
+            </Layout>
+          </UserProvider>
+        </FriendProvider>
       </ErrorProvider>
     </BrowserRouter>
   );
