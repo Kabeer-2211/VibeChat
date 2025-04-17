@@ -113,13 +113,14 @@ const FriendProvider = ({ children }: { children: React.ReactNode }) => {
         try {
             const { data } = await deleteFriend(id);
             if (data.success) {
+                fetchFriends();
                 showMessage("User removed from friend list");
             }
         } catch (err) {
             const axiosError = err as AxiosError<ApiResponse>;
             showError(axiosError.response?.data.message || "Error in removing friend");
         }
-    }, [showError, showMessage]);
+    }, [fetchFriends, showError, showMessage]);
 
     useEffect(() => {
         fetchFriends();

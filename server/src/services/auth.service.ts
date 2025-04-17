@@ -134,6 +134,7 @@ export async function searchUser(query: string, id: string): Promise<User[]> {
   }
   const friends = await FriendModel.find({ $or: [{ userId: id }, { friendId: id }] });
   const excludeIds = new Set();
+  excludeIds.add(id);
   friends.map(item => {
     if (item.friendId) excludeIds.add(item.friendId.toString());
     if (item.userId) excludeIds.add(item.userId.toString());
