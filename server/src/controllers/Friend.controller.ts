@@ -6,6 +6,7 @@ import {
   acceptFriendRequest,
   removeFriend,
   getUserFriends,
+  getUserFriendRequests,
   blockFriend as block,
   unBlockFriend as unBlock,
 } from "../services/friend.service";
@@ -20,9 +21,9 @@ export async function createFriend(
     return;
   }
   try {
-    const { friendId } = req.body;
+    const { id } = req.params;
     const user = req.user;
-    const friend = await createFriendRequest(user._id, friendId);
+    const friend = await createFriendRequest(user._id, id);
     res
       .status(200)
       .json({ success: true, message: "Friend request added", friend });
@@ -135,6 +136,23 @@ export async function getFriends(req: Request, res: Response): Promise<void> {
       success: true,
       message: "Friends retrieved successfully",
       friends,
+    });
+    return;
+  } catch (err) {
+    const error = err as Error;
+    res.status(400).json({ success: false, message: error.message });
+    return;
+  }
+}
+
+export async function getFriendRequests(req: Request, res: Response): Promise<void> {
+  try {
+    const user = req.user;
+    const friendRequests = await getUserFriendRequests(user.id);
+    res.status(200).json({
+      success: true,
+      message: "Friends retrieved successfully",
+      friendRequests,
     });
     return;
   } catch (err) {

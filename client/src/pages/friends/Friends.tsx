@@ -1,11 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 import { useDebounce } from 'use-debounce';
 import { AxiosError } from 'axios';
+import { RefreshCcw } from 'lucide-react';
 
 import { Input } from '@/components/ui/input';
 import AddFriend from '@/components/AddFriend';
-import { getAvatarName } from '@/helper/helper';
+import FriendRequest from '@/components/FriendRequest';
 import { getUsers } from '@/services/user';
 import { useError } from '@/hooks/useError';
 import { ApiResponse, Friend, User } from '@/types/apiResponse';
@@ -20,20 +21,20 @@ const Friends = () => {
   const [debouncedQuery] = useDebounce(query, 700);
   const user = useAppSelector(state => state.user);
   const { showError } = useError();
-  useEffect(() => {
-    async function fetchFriends() {
-      try {
-        const { data } = await getFriends();
-        if (data.success) {
-          setFriends(data.friends)
-        }
-      } catch (err) {
-        const axiosError = err as AxiosError<ApiResponse>;
-        showError(axiosError.response?.data.message || "Error in fetching friends");
+  const fetchFriends = useCallback(async () => {
+    try {
+      const { data } = await getFriends();
+      if (data.success) {
+        setFriends(data.friends)
       }
+    } catch (err) {
+      const axiosError = err as AxiosError<ApiResponse>;
+      showError(axiosError.response?.data.message || "Error in fetching friends");
     }
+  }, [showError]);
+  useEffect(() => {
     fetchFriends();
-  }, [showError])
+  }, [fetchFriends])
   useEffect(() => {
     async function searchUsers(): Promise<void> {
       try {
@@ -61,16 +62,19 @@ const Friends = () => {
         <div className={`${collapse ? 'h-2/4' : 'h-4/5'} overflow-y-auto transition-all duration-300`}>
           {debouncedQuery && <h5 className='p-2 text-lg'><span className='font-semibold'>Search Results For:</span> {debouncedQuery}</h5>}
           {
-            users && users.map((user) => <AddFriend key={user._id} imageUrl={user.avatar} imageFallback={getAvatarName(user.username)} username={user.username} email={user.email} />)
+            users && users.length > 0 ? users.map((user) => <AddFriend key={user._id} user={user} />) : <FriendRequest />
           }
         </div>
         <div className={`${collapse ? 'h-2/4 overflow-y-auto' : 'h-1/5 overflow-hidden'} transition-all duration-300 border-t`}>
-          <h2 className='p-2 text-lg font-semibold cursor-pointer' onClick={() => setCollapse(!collapse)}>My Friends <i className={`ri-arrow-${collapse ? 'down' : 'up'}-s-line`}></i></h2>
+          <div className='flex items-center justify-between'>
+            <h2 className='p-2 text-lg font-semibold cursor-pointer' onClick={() => setCollapse(!collapse)}>My Friends <i className={`ri-arrow-${collapse ? 'down' : 'up'}-s-line`}></i></h2>
+            <RefreshCcw className='cursor-pointer' onClick={fetchFriends} />
+          </div>
           {
-            friends && friends.map((friend) => {
+            friends && friends.length > 0 ? friends.map((friend) => {
               const friendId = friend.userId._id === user._id ? friend.friendId : friend.userId;
-              return <AddFriend key={friend._id} imageUrl={friendId.avatar} imageFallback={getAvatarName(friendId.username)} username={friendId.username} email={friendId.email} isAdded={true} showUnfriendIcon={true} />
-            })
+              return <AddFriend key={friend._id} user={friendId} isAdded={true} showUnfriendIcon={true} />
+            }) : <h1 className='text-center text-lg font-semibold mt-5'>No Friends Yet</h1>
           }
         </div>
       </div>

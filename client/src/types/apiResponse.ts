@@ -24,4 +24,5 @@ export interface ApiResponse {
   users?: [User];
   friend?: Friend;
   friends?: [Friend];
+  friendRequests?: [Friend];
 }

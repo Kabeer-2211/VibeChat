@@ -7,9 +7,9 @@ import * as friendController from "../controllers/Friend.controller";
 const router = Router();
 
 router.post(
-  "/add-friend-request",
+  "/add-friend-request/:id",
   [
-    body("friendId").isString().withMessage("Friend id is required"),
+    param("id").isString().withMessage("Friend id is required"),
   ],
   auth,
   friendController.createFriend
@@ -50,5 +50,7 @@ router.delete(
 );
 
 router.get("/get-friends", auth, friendController.getFriends);
+
+router.get("/get-friend-requests", auth, friendController.getFriendRequests);
 
 export default router;

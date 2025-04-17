@@ -126,9 +126,6 @@ export async function removeFriend(
   if (!friendship) {
     throw new Error("Friend does not exist");
   }
-  if (friendship.status !== "accepted") {
-    throw new Error("Invalid Request");
-  }
   await FriendModel.deleteOne({
     $or: [
       { userId: id, friendId },
@@ -142,7 +139,19 @@ export async function getUserFriends(id: string): Promise<Friend[]> {
     throw new Error("Invalid user id");
   }
   const friends = await FriendModel.find({
+    status: { $nin: ['pending', 'declined'] },
     $or: [{ userId: id }, { friendId: id }],
   }).populate(["userId", "friendId"]);
   return friends;
+}
+
+export async function getUserFriendRequests(id: string): Promise<Friend[]> {
+  if (!id || !mongoose.isValidObjectId(id)) {
+    throw new Error("Invalid user id");
+  }
+  const friendRequests = await FriendModel.find({
+    status: "pending",
+    friendId: id
+  }).populate(["userId", "friendId"]);
+  return friendRequests;
 }
