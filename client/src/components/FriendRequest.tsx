@@ -4,18 +4,20 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getAvatarName } from "@/helper/helper";
 import { Button } from "@/components/ui/button";
 import { useFriend } from "@/hooks/useFriends";
+import { useAppSelector } from '@/hooks/redux';
 
 const FriendRequest = () => {
-    const { friendRequests, getRequests, acceptRequest, declineRequest } = useFriend();
+    const { getRequests, acceptRequest, declineRequest } = useFriend();
+    const friend = useAppSelector(state => state.friend);
 
     return (
         <>
-            {friendRequests && <div>
+            {friend.friendRequests && <div>
                 <h1 className="p-3 pb-1 text-xl font-semibold flex items-center justify-between">
-                    Friend Requests ({friendRequests.length})
+                    Friend Requests ({friend.friendRequests.length})
                     <RefreshCcw className="cursor-pointer" onClick={getRequests} />
                 </h1>
-                {friendRequests.map(friend => <div key={friend._id} className='hover:bg-slate-100 p-3 flex items-center justify-between'>
+                {friend.friendRequests.map(friend => <div key={friend._id} className='hover:bg-slate-100 p-3 flex items-center justify-between'>
                     <div className='flex items-center gap-3'>
                         <Avatar className='w-12 h-12'>
                             <AvatarImage src={`${import.meta.env.VITE_BASE_URL}/avatars/${friend.userId.avatar}`} />

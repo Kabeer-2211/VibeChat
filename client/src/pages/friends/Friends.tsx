@@ -15,15 +15,15 @@ const Friends = () => {
   const [collapse, setCollapse] = useState<boolean>(false)
   const [debouncedQuery] = useDebounce(query, 700);
   const { showError } = useError();
-  const { fetchFriends, friends, searchUsers, users } = useFriend();
-  const user = useAppSelector(state => state.user);
+  const { fetchFriends, searchUsers } = useFriend();
+  const { user, friend } = useAppSelector(state => state);
   useEffect(() => {
     fetchFriends();
   }, [fetchFriends])
   useEffect(() => {
     searchUsers(debouncedQuery);
   }, [debouncedQuery, searchUsers, showError]);
-  
+
   return (
     <div className='flex flex-col h-full'>
       <Input className='rounded-none outline-0 shadow-0 border-0 border-b py-6' placeholder='Search by email or username' value={query} onChange={(e) => {
@@ -33,7 +33,7 @@ const Friends = () => {
         <div className={`${collapse ? 'h-2/4' : 'h-4/5'} overflow-y-auto transition-all duration-300`}>
           {debouncedQuery && <h5 className='p-2 text-lg'><span className='font-semibold'>Search Results For:</span> {debouncedQuery}</h5>}
           {
-            users && users.length > 0 ? users.map((user) => <AddFriend key={user._id} user={user} />) : <FriendRequest />
+            friend.users && friend.users.length > 0 ? friend.users.map((user) => <AddFriend key={user._id} user={user} />) : <FriendRequest />
           }
         </div>
         <div className={`${collapse ? 'h-2/4 overflow-y-auto' : 'h-1/5 overflow-hidden'} transition-all duration-300 border-t`}>
@@ -42,7 +42,7 @@ const Friends = () => {
             <RefreshCcw className='cursor-pointer' onClick={fetchFriends} />
           </div>
           {
-            friends && friends.length > 0 ? friends.map((friend) => {
+            friend.friends && friend.friends.length > 0 ? friend.friends.map((friend) => {
               const friendId = friend.userId._id === user._id ? friend.friendId : friend.userId;
               return <AddFriend key={friend._id} user={friendId} isAdded={true} showUnfriendIcon={true} />
             }) : <h1 className='text-center text-lg font-semibold mt-5'>No Friends Yet</h1>

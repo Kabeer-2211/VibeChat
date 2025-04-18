@@ -1,16 +1,15 @@
-import React, { createContext, useCallback, useEffect, useState } from 'react';
+import React, { createContext, useCallback, useEffect } from 'react';
 
 import { AxiosError } from 'axios';
 
-import { ApiResponse, Friend, User } from '@/types/apiResponse';
+import { ApiResponse } from '@/types/apiResponse';
 import { useError } from '@/hooks/useError';
 import { acceptFriendRequest, addFriend, deleteFriend, getFriendRequests, getFriends } from '@/services/friend';
 import { getUsers } from '@/services/user';
+import { useAppDispatch } from '@/hooks/redux';
+import { setFriends, setUsers, setFriendRequests } from '@/redux/slices/friendSlice';
 
 export interface FriendContextType {
-    friends: [Friend] | undefined;
-    users: [User] | undefined;
-    friendRequests: [Friend] | undefined;
     fetchFriends: () => void;
     searchUsers: (query: string) => void;
     getRequests: () => void;
@@ -23,22 +22,20 @@ export interface FriendContextType {
 export const friendContext = createContext<FriendContextType | undefined>(undefined);
 
 const FriendProvider = ({ children }: { children: React.ReactNode }) => {
-    const [friends, setFriends] = useState<[Friend]>();
-    const [users, setUsers] = useState<[User]>();
-    const [friendRequests, setFriendRequests] = useState<[Friend] | undefined>();
+    const dispatch = useAppDispatch();
     const { showError, showMessage } = useError();
 
     const fetchFriends = useCallback(async (): Promise<void> => {
         try {
             const { data } = await getFriends();
             if (data.success) {
-                setFriends(data.friends)
+                dispatch(setFriends(data.friends))
             }
         } catch (err) {
             const axiosError = err as AxiosError<ApiResponse>;
             showError(axiosError.response?.data.message || "Error in fetching friends");
         }
-    }, [showError]);
+    }, [dispatch, showError]);
 
     const searchUsers = useCallback(async (query: string): Promise<void> => {
         try {
@@ -46,28 +43,28 @@ const FriendProvider = ({ children }: { children: React.ReactNode }) => {
             if (query) {
                 const { data } = await getUsers(query);
                 if (data.success) {
-                    setUsers(data.users)
+                    dispatch(setUsers(data.users));
                 }
             } else {
-                setUsers(undefined);
+                dispatch(setUsers(undefined));
             }
         } catch (err) {
             const axiosError = err as AxiosError<ApiResponse>;
             showError(axiosError.response?.data.message || "Error in searching user");
         }
-    }, [showError]);
+    }, [dispatch, showError]);
 
     const getRequests = useCallback(async (): Promise<void> => {
         try {
             const { data } = await getFriendRequests();
             if (data.success) {
-                setFriendRequests(data.friendRequests);
+                dispatch(setFriendRequests(data.friendRequests));
             }
         } catch (err) {
             const axiosError = err as AxiosError<ApiResponse>;
             showError(axiosError.response?.data.message || "Error in sending friend request");
         }
-    }, [showError]);
+    }, [dispatch, showError]);
 
     const acceptRequest = useCallback(async (id: string): Promise<void> => {
         try {
@@ -131,7 +128,7 @@ const FriendProvider = ({ children }: { children: React.ReactNode }) => {
     }, [getRequests]);
 
     return (
-        <friendContext.Provider value={{ friends, users, friendRequests, fetchFriends, searchUsers, getRequests, acceptRequest, declineRequest, handleAddFriendClick, handleUnFriendClick }}>
+        <friendContext.Provider value={{ fetchFriends, searchUsers, getRequests, acceptRequest, declineRequest, handleAddFriendClick, handleUnFriendClick }}>
             {children}
         </friendContext.Provider>
     )
