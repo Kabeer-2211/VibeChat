@@ -39,7 +39,6 @@ const FriendProvider = ({ children }: { children: React.ReactNode }) => {
 
     const searchUsers = useCallback(async (query: string): Promise<void> => {
         try {
-            console.log(query)
             if (query) {
                 const { data } = await getUsers(query);
                 if (data.success) {

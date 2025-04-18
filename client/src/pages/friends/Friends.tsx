@@ -18,9 +18,6 @@ const Friends = () => {
   const { fetchFriends, searchUsers } = useFriend();
   const { user, friend } = useAppSelector(state => state);
   useEffect(() => {
-    fetchFriends();
-  }, [fetchFriends])
-  useEffect(() => {
     searchUsers(debouncedQuery);
   }, [debouncedQuery, searchUsers, showError]);
 
