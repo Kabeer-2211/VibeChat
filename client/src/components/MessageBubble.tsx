@@ -11,7 +11,7 @@ const MessageBubble = ({
   friend?: Friend;
   isFriend?: boolean;
 }) => {
-  const friendDetail =
+  const receiverDetail =
     friend?.friendId._id === chat.receiverId
       ? friend?.friendId
       : friend?.userId;
@@ -19,16 +19,18 @@ const MessageBubble = ({
     <div className="flex items-start gap-2.5 mb-3">
       <img
         className="w-8 h-8 rounded-full"
-        src={`${import.meta.env.VITE_BASE_URL}/avatars/${friendDetail?.avatar}`}
+        src={`${import.meta.env.VITE_BASE_URL}/avatars/${
+          receiverDetail?.avatar
+        }`}
         alt="Jese image"
       />
       <div className="flex flex-col gap-1 w-full max-w-[320px]">
         <div className="flex items-center space-x-2 rtl:space-x-reverse">
           <span className="text-sm font-semibold text-gray-900">
-            {friendDetail?.username}
+            {receiverDetail?.username}
           </span>
           <span className="text-sm font-normal text-gray-500">
-            {moment(chat.createdAt).format('h:mm')}
+            {moment(chat.createdAt).format("h:mm")}
           </span>
         </div>
         <div
