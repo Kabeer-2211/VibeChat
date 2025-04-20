@@ -8,10 +8,21 @@ export interface User {
   isOnline: boolean;
   createdAt: Date;
 }
+
+export interface Chat extends Document {
+  message: string;
+  receiverId: string;
+  isSeen: boolean;
+  createdAt: Date;
+  updatedAt: Date | null;
+  deletedAt: Date | null;
+}
+
 export interface Friend {
   _id: string;
   userId: User;
   friendId: User;
+  chat: [Chat];
   status: string;
   createdAt: Date;
 }

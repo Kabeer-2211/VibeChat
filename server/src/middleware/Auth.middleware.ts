@@ -11,7 +11,7 @@ export async function auth(
   try {
     const token = req.headers.authorization?.split(" ")[1];
     if (!token) {
-      throw new Error();
+      throw new Error("Unauthorized");
     }
     const decoded = (await jwt.verify(
       token,
@@ -19,13 +19,12 @@ export async function auth(
     )) as JwtPayload;
     const user = await UserModel.findById(decoded.id);
     if (!user) {
-      throw new Error();
+      throw new Error("User not found");
     }
     req.user = user;
     next();
     return;
   } catch (err) {
-    console.log(err);
     res.status(401).json({ success: false, message: "Unauthorized" });
     return;
   }
