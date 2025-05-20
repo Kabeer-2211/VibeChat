@@ -96,7 +96,7 @@ const UpdateProfileInfo = () => {
                 <span className='text-red-600'>{form.formState.errors.avatar?.message}</span>
                 <Button variant="destructive" className='cursor-pointer' onClick={deletePfp} disabled={isLoading}>
                     {isLoading && <LoaderCircle className="animate-spin" />}
-                    Delete Profile Picture
+                    Remove Profile Picture
                 </Button>
             </div>
             <div className='w-full'>

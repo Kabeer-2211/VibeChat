@@ -14,7 +14,7 @@ const Sidebar = ({ setPage, page }: { setPage: CallableFunction, page: string })
             </Avatar>
             <div className='flex flex-col items-center flex-grow gap-5'>
                 <Tooltip label='Chats'>
-                    <MessageSquareMore className={`cursor-pointer ${page === 'chats' && 'text-[#625EF1]'}`} onClick={() => setPage('chatList')} />
+                    <MessageSquareMore className={`cursor-pointer ${page === 'chatList' && 'text-[#625EF1]'}`} onClick={() => setPage('chatList')} />
                 </Tooltip>
                 <Tooltip label='Friends'>
                     <User className={`cursor-pointer ${page === 'friends' && 'text-[#625EF1]'}`} onClick={() => setPage('friends')} />
