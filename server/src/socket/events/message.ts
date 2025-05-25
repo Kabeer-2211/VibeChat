@@ -6,6 +6,7 @@ import { publish } from "../../redis/publisher";
 export default async (io: Server, socket: Socket) => {
   subscribe("MESSAGE", async (data) => {
     const parsed = JSON.parse(data);
+    io.to(parsed.chatId).emit("newMessage", parsed);
 
     if (parsed) {
       const roomLength =
@@ -29,6 +30,5 @@ export default async (io: Server, socket: Socket) => {
 
   socket.on("sendMessage", async (data) => {
     await publish("MESSAGE", data);
-    io.to(data.chatId).emit("newMessage", data);
   });
 };
