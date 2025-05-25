@@ -1,22 +1,17 @@
 import { Server, Socket } from "socket.io";
 
-import MessageModel from "../../models/Message.model";
 import { subscribe } from "../../redis/subscriber";
 import { publish } from "../../redis/publisher";
+import { messageProducer } from "../../services/producer";
+
 export default async (io: Server, socket: Socket) => {
   subscribe("MESSAGE", async (data) => {
     const parsed = JSON.parse(data);
     io.to(parsed.chatId).emit("newMessage", parsed);
 
     if (parsed) {
-      const roomLength =
-        io.sockets.adapter.rooms.get(parsed.friendId)?.size || 0;
-      await MessageModel.create({
-        message: parsed.message,
-        receiverId: parsed.receiverId,
-        friendId: parsed.friendId,
-        isSeen: roomLength === 2,
-      });
+      parsed.isSeen = io.sockets.adapter.rooms.get(parsed.friendId)?.size || 0;
+      await messageProducer("MESSAGE", [{ value: JSON.stringify(parsed) }]);
     }
   });
 
