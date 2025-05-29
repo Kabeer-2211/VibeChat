@@ -60,10 +60,10 @@ const userSchema: Schema<User> = new Schema({
     required: true,
     select: false,
   },
-  isOnline: {
-    type: Boolean,
-    default: false,
-  },
+  // isOnline: {
+  //   type: Boolean,
+  //   default: false,
+  // },
   createdAt: {
     type: Date,
     default: Date.now(),
