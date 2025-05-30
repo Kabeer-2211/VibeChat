@@ -131,7 +131,7 @@ export async function deleteFriend(
 export async function getFriends(req: Request, res: Response): Promise<void> {
   try {
     const user = req.user;
-    const friends = await getUserFriendRequests(user.id);
+    const friends = await getUserFriends(user.id);
     res.status(200).json({
       success: true,
       message: "Friends retrieved successfully",

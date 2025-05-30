@@ -142,7 +142,7 @@ export async function getUserFriends(id: string): Promise<Friend[]> {
   const friends = await FriendModel.find({
     status: { $nin: ['pending', 'declined'] },
     $or: [{ userId: id }, { friendId: id }],
-  }).populate(["userId", "friendId"]);
+  }).populate(["userId", "friendId"]).lean();
   for (const friend of friends) {
     const friendStatus = await client.scard(`user_sockets:${friend.friendId._id}`);
     const userStatus = await client.scard(`user_sockets:${friend.userId._id}`);
