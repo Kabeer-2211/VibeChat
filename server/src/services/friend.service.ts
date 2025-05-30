@@ -2,6 +2,7 @@ import mongoose, { mongo } from "mongoose";
 
 import FriendModel, { Friend } from "../models/Friend.model";
 import UserModel from "../models/User.model";
+import { client } from "../config/redis";
 
 export async function createFriendRequest(
   userId: string,
@@ -142,6 +143,12 @@ export async function getUserFriends(id: string): Promise<Friend[]> {
     status: { $nin: ['pending', 'declined'] },
     $or: [{ userId: id }, { friendId: id }],
   }).populate(["userId", "friendId"]);
+  for (const friend of friends) {
+    const friendStatus = await client.scard(`user_sockets:${friend.friendId._id}`);
+    const userStatus = await client.scard(`user_sockets:${friend.userId._id}`);
+    friend.friendId.isOnline = friendStatus > 0;
+    friend.userId.isOnline = userStatus > 0;
+  }
   return friends;
 }
 
