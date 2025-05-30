@@ -15,6 +15,8 @@ export function initSocket(server: http.Server) {
   });
   io.adapter(createAdapter(publisher, subscriber));
 
+  io.adapter(createAdapter(publisher, subscriber));
+
   io.use(auth);
 
   io.on("connection", async (socket) => {
