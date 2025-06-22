@@ -53,4 +53,8 @@ router.get("/get-friends", auth, friendController.getFriends);
 
 router.get("/get-friend-requests", auth, friendController.getFriendRequests);
 
+router.get("/get-chat-messages/:id", [
+  param("id").isString().withMessage("id is required")
+], auth, friendController.getChatMessages);
+
 export default router;

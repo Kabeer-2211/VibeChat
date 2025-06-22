@@ -5,7 +5,7 @@ const consumer = kafka.consumer({ groupId: "group-1" });
 
 export async function messageConsumer() {
   await consumer.connect();
-  await consumer.subscribe({ topic: "MESSAGE", fromBeginning: true });
+  await consumer.subscribe({ topic: "CHAT", fromBeginning: true });
   await consumer.run({
     eachMessage: async ({ message }) => {
       const msg = JSON.parse(message.value?.toString() || "{}");
@@ -13,7 +13,7 @@ export async function messageConsumer() {
         await MessageModel.create({
           message: msg.message,
           receiverId: msg.receiverId,
-          friendId: msg.friendId,
+          userId: msg.userId,
           isSeen: msg.roomLength,
         });
       }

@@ -4,10 +4,11 @@ import { AxiosError } from 'axios';
 
 import { ApiResponse } from '@/types/apiResponse';
 import { useError } from '@/hooks/useError';
-import { acceptFriendRequest, addFriend, deleteFriend, getFriendRequests, getFriends } from '@/services/friend';
+import { acceptFriendRequest, addFriend, deleteFriend, getChatMessages, getFriendRequests, getFriends } from '@/services/friend';
 import { getUsers } from '@/services/user';
 import { useAppDispatch } from '@/hooks/redux';
 import { setFriends, setUsers, setFriendRequests } from '@/redux/slices/friendSlice';
+import { setChatMessages } from "@/redux/slices/chatSlice";
 
 export interface FriendContextType {
     fetchFriends: () => void;
@@ -17,6 +18,7 @@ export interface FriendContextType {
     declineRequest: (id: string) => void;
     handleAddFriendClick: (id: string, ref: React.RefObject<SVGSVGElement | null>) => void;
     handleUnFriendClick: (id: string) => void;
+    fetchMessages: (id: string) => void;
 }
 
 export const friendContext = createContext<FriendContextType | undefined>(undefined);
@@ -118,6 +120,18 @@ const FriendProvider = ({ children }: { children: React.ReactNode }) => {
         }
     }, [fetchFriends, showError, showMessage]);
 
+    const fetchMessages = useCallback(async (id: string): Promise<void> => {
+        try {
+            const { data } = await getChatMessages(id);
+            if (data.success) {
+                dispatch(setChatMessages(data.messages));
+            }
+        } catch (err) {
+            const axiosError = err as AxiosError<ApiResponse>;
+            showError(axiosError.response?.data.message || "Error in fetching messages");
+        }
+    }, [dispatch, showError]);
+
     useEffect(() => {
         fetchFriends();
     }, [fetchFriends]);
@@ -127,7 +141,7 @@ const FriendProvider = ({ children }: { children: React.ReactNode }) => {
     }, [getRequests]);
 
     return (
-        <friendContext.Provider value={{ fetchFriends, searchUsers, getRequests, acceptRequest, declineRequest, handleAddFriendClick, handleUnFriendClick }}>
+        <friendContext.Provider value={{ fetchFriends, searchUsers, getRequests, acceptRequest, declineRequest, handleAddFriendClick, handleUnFriendClick, fetchMessages }}>
             {children}
         </friendContext.Provider>
     )

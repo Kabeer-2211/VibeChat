@@ -84,7 +84,6 @@ export async function register(
     });
     return;
   } catch (err) {
-    console.log(err);
     res.status(500).json({ success: false, message: "an error occurred" });
     return;
   }
@@ -136,7 +135,6 @@ export async function login(
     });
     return;
   } catch (err) {
-    console.log(err);
     res.status(500).json({ success: false, message: "an error occurred" });
     return;
   }
@@ -164,7 +162,6 @@ export async function verifyEmail(
     });
     return;
   } catch (err) {
-    console.log(err);
     const error = err as Error;
     res.status(400).json({ success: false, message: error.message });
     return;
@@ -189,7 +186,6 @@ export async function changePassword(
       .json({ success: true, message: "password changed successfully", user });
     return;
   } catch (err) {
-    console.log(err);
     const error = err as Error;
     res.status(400).json({ success: false, message: error.message });
     return;
@@ -219,7 +215,6 @@ export async function updateUserInfo(
       .json({ success: true, message: "User updated successfully", user });
     return;
   } catch (err) {
-    console.log(err);
     const error = err as Error;
     res.status(400).json({ success: false, message: error.message });
     return;
@@ -238,7 +233,6 @@ export async function deleteProfilePicture(
       .json({ success: true, message: "Profile picture deleted", user });
     return;
   } catch (err) {
-    console.log(err);
     const error = err as Error;
     res.status(400).json({ success: false, message: error.message });
     return;
@@ -256,7 +250,6 @@ export async function getUserProfile(
       .json({ success: true, message: "user retrieved successfully", user });
     return;
   } catch (err) {
-    console.log(err);
     res.status(500).json({ success: false, message: "Internal server error" });
     return;
   }
@@ -285,7 +278,6 @@ export async function getUsers(
       .json({ success: true, message: "Users retrieved successfully", users });
     return;
   } catch (err) {
-    console.log(err);
     const error = err as Error;
     res.status(400).json({ success: false, message: error.message });
     return;

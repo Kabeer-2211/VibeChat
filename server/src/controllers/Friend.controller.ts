@@ -9,6 +9,7 @@ import {
   getUserFriendRequests,
   blockFriend as block,
   unBlockFriend as unBlock,
+  getMessages,
 } from "../services/friend.service";
 
 export async function createFriend(
@@ -23,6 +24,10 @@ export async function createFriend(
   try {
     const { id } = req.params;
     const user = req.user;
+    if (!user) {
+      res.status(400).json({ success: false, message: "User not found" });
+      return;
+    }
     const friend = await createFriendRequest(user._id, id);
     res
       .status(200)
@@ -46,6 +51,11 @@ export async function acceptFriend(
   }
   try {
     const { id } = req.params;
+    const user = req.user;
+    if (!user) {
+      res.status(400).json({ success: false, message: "User not found" });
+      return;
+    }
     const friend = await acceptFriendRequest(id);
     res
       .status(200)
@@ -70,6 +80,10 @@ export async function blockFriend(
   try {
     const { id } = req.params;
     const user = req.user;
+    if (!user) {
+      res.status(400).json({ success: false, message: "User not found" });
+      return;
+    }
     const friend = await block(id, user._id);
     res
       .status(200)
@@ -94,6 +108,10 @@ export async function unBlockFriend(
   try {
     const { id } = req.params;
     const user = req.user;
+    if (!user) {
+      res.status(400).json({ success: false, message: "User not found" });
+      return;
+    }
     const friend = await unBlock(id, user._id);
     res
       .status(200)
@@ -131,6 +149,10 @@ export async function deleteFriend(
 export async function getFriends(req: Request, res: Response): Promise<void> {
   try {
     const user = req.user;
+    if (!user) {
+      res.status(400).json({ success: false, message: "User not found" });
+      return;
+    }
     const friends = await getUserFriends(user.id);
     res.status(200).json({
       success: true,
@@ -148,11 +170,37 @@ export async function getFriends(req: Request, res: Response): Promise<void> {
 export async function getFriendRequests(req: Request, res: Response): Promise<void> {
   try {
     const user = req.user;
+    if (!user) {
+      res.status(400).json({ success: false, message: "User not found" });
+      return;
+    }
     const friendRequests = await getUserFriendRequests(user.id);
     res.status(200).json({
       success: true,
       message: "Friends retrieved successfully",
       friendRequests,
+    });
+    return;
+  } catch (err) {
+    const error = err as Error;
+    res.status(400).json({ success: false, message: error.message });
+    return;
+  }
+}
+
+export async function getChatMessages(req: Request<{ id: string }>, res: Response): Promise<void> {
+  try {
+    const user = req.user;
+    const friendId = req.params.id;
+    if (!user) {
+      res.status(400).json({ success: false, message: "User not found" });
+      return;
+    }
+    const messages = await getMessages(user.id, friendId);
+    res.status(200).json({
+      success: true,
+      message: "Messages retrieved successfully",
+      messages,
     });
     return;
   } catch (err) {

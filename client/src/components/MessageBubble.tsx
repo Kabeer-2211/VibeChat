@@ -1,53 +1,44 @@
 import moment from "moment";
 
-import { Chat, Friend } from "@/types/apiResponse";
+import { Chat } from "@/types/apiResponse";
 
 const MessageBubble = ({
   chat,
-  friend,
   isFriend = true,
 }: {
   chat: Chat;
-  friend?: Friend;
   isFriend?: boolean;
 }) => {
-  const receiverDetail =
-    friend?.friendId._id === chat.receiverId
-      ? friend?.friendId
-      : friend?.userId;
   return (
     <div className="flex items-start gap-2.5 mb-3">
       <img
         className="w-8 h-8 rounded-full"
-        src={`${import.meta.env.VITE_BASE_URL}/avatars/${
-          receiverDetail?.avatar
-        }`}
+        src={`${import.meta.env.VITE_BASE_URL}/avatars/${chat?.userId?.avatar
+          }`}
         alt="Jese image"
       />
       <div className="flex flex-col gap-1 w-full max-w-[320px]">
         <div className="flex items-center space-x-2 rtl:space-x-reverse">
           <span className="text-sm font-semibold text-gray-900">
-            {receiverDetail?.username}
+            {chat?.userId?.username}
           </span>
           <span className="text-sm font-normal text-gray-500">
-            {moment(chat.createdAt).format("h:mm")}
+            {moment(chat.createdAt).format("h:mm A")}
           </span>
         </div>
         <div
-          className={`flex flex-col leading-1.5 p-4 border-gray-200 ${
-            isFriend ? "bg-gray-200" : "bg-[#2563eb]"
-          } rounded-e-xl rounded-es-xl`}
+          className={`flex flex-col leading-1.5 p-4 border-gray-200 ${isFriend ? "bg-gray-200" : "bg-[#2563eb]"
+            } rounded-e-xl rounded-es-xl`}
         >
           <p
-            className={`text-sm font-normal ${
-              isFriend ? "text-gray-900" : "text-white"
-            }`}
+            className={`text-sm font-normal ${isFriend ? "text-gray-900" : "text-white"
+              }`}
           >
             {chat.message}
           </p>
         </div>
         <span className="text-sm font-normal text-gray-500">
-          {chat.isSeen ? "Seen" : ""}
+          {chat.isSeen ? "Seen" : "Not Seen"}
         </span>
       </div>
       {/* <button

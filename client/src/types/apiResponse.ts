@@ -10,8 +10,10 @@ export interface User {
 }
 
 export interface Chat extends Document {
+  _id: string;
   message: string;
-  receiverId: string;
+  receiverId: User;
+  userId: User;
   isSeen: boolean;
   createdAt: Date;
   updatedAt: Date | null;
@@ -36,4 +38,5 @@ export interface ApiResponse {
   friend?: Friend;
   friends?: [Friend];
   friendRequests?: [Friend];
+  messages?: [Chat];
 }

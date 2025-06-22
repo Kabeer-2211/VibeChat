@@ -3,7 +3,7 @@ import mongoose, { Schema, Document } from "mongoose";
 export interface Chat extends Document {
   message: string;
   receiverId: mongoose.Schema.Types.ObjectId;
-  friendId: mongoose.Schema.Types.ObjectId;
+  userId: mongoose.Schema.Types.ObjectId;
   isSeen: boolean;
   createdAt: Date;
   updatedAt: Date | null;
@@ -18,12 +18,12 @@ const messageSchema: Schema<Chat> = new Schema({
   receiverId: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
-    refs: "User",
+    ref: "User",
   },
-  friendId: {
+  userId: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
-    refs: "Friend",
+    ref: "User",
   },
   isSeen: {
     type: Boolean,

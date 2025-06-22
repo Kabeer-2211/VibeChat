@@ -7,6 +7,7 @@ import MessageBubble from "@/components/MessageBubble";
 import { useAppSelector } from "@/hooks/redux";
 import { getAvatarName } from "@/helper/helper";
 import { useSession } from "@/hooks/useSession";
+import { useFriend } from "@/hooks/useFriends";
 import { useAppDispatch } from "@/hooks/redux";
 import { setChat } from "@/redux/slices/chatSlice";
 
@@ -15,6 +16,7 @@ const Chat = () => {
   const dispatch = useAppDispatch();
   const [message, setMessage] = useState<string>("");
   const { chat, user } = useAppSelector((state) => state);
+  const { fetchMessages } = useFriend();
   const previousChatId = useRef<string | null>(null);
   const friend =
     chat.currentChat?.userId._id === user._id
@@ -52,7 +54,7 @@ const Chat = () => {
       if (message && socket && friend && chat.currentChat) {
         socket.emit("sendMessage", {
           message,
-          receiver: friend._id,
+          receiverId: friend._id,
           chatId: chat.currentChat._id,
         });
         setMessage("");
@@ -60,6 +62,15 @@ const Chat = () => {
     },
     [socket, message]
   );
+
+  useEffect(() => {
+    if (chat.currentChat) {
+      const id = chat.currentChat.userId._id === user._id
+        ? chat.currentChat.friendId._id
+        : chat.currentChat.userId._id;
+      fetchMessages(id);
+    }
+  }, [chat.currentChat, fetchMessages]);
 
   return (
     <div className="h-screen flex flex-col">
@@ -79,12 +90,12 @@ const Chat = () => {
       </div>
       <div className="flex-grow flex flex-col">
         <div className="flex-grow max-h-[75vh] overflow-y-auto p-3">
-          {chat.currentChat &&
-            chat.currentChat.chat.map((item) => (
+          {chat.chat &&
+            chat.chat.map((item) => (
               <MessageBubble
+                key={item._id}
                 chat={item}
-                friend={chat.currentChat}
-                isFriend={item.receiverId !== user._id}
+                isFriend={item.userId._id !== user._id}
               />
             ))}
         </div>

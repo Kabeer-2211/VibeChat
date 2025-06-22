@@ -3,6 +3,8 @@ import mongoose, { mongo } from "mongoose";
 import FriendModel, { Friend } from "../models/Friend.model";
 import UserModel from "../models/User.model";
 import { client } from "../config/redis";
+import MessageModel from "../models/Message.model";
+import { Message } from "../models/Message.model";
 
 export async function createFriendRequest(
   userId: string,
@@ -161,4 +163,14 @@ export async function getUserFriendRequests(id: string): Promise<Friend[]> {
     friendId: id
   }).populate(["userId", "friendId"]);
   return friendRequests;
+}
+
+export async function getMessages(userId: string, friendId: string): Promise<Message[]> {
+  const messages = await MessageModel.find({
+    $or: [
+      { userId: userId, receiverId: friendId },
+      { userId: friendId, receiverId: userId },
+    ],
+  }).populate(["userId", "receiverId"]).lean();
+  return messages;
 }

@@ -2,7 +2,6 @@ import { Server, Socket } from "socket.io";
 
 import { messageProducer } from "../../services/producer";
 
-let isSubscribed = false;
 export default async (io: Server, socket: Socket) => {
 
   socket.on("joinRoom", (data) => {
@@ -14,12 +13,12 @@ export default async (io: Server, socket: Socket) => {
   });
 
   socket.on("sendMessage", async (data) => {
-    const parsed = JSON.parse(data);
-    io.to(parsed.chatId).emit("newMessage", parsed);
+    data.userId = socket.user.id;
+    io.to(data.chatId).emit("newMessage", data);
 
-    if (parsed) {
-      parsed.isSeen = io.sockets.adapter.rooms.get(parsed.friendId)?.size || 0;
-      await messageProducer("MESSAGE", [{ value: JSON.stringify(parsed) }]);
+    if (data) {
+      data.isSeen = io.sockets.adapter.rooms.get(data.chatId)?.size || 0;
+      await messageProducer("CHAT", [{ value: JSON.stringify(data) }]);
     }
   });
 };

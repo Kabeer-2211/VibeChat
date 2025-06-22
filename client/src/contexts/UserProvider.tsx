@@ -16,6 +16,7 @@ import { useError } from "@/hooks/useError";
 import { deleteToken, getToken } from "@/utils/user";
 import { initializeSocket } from "@/config/socket";
 import { Socket } from "socket.io-client";
+import { changeUserStatus } from "@/redux/slices/friendSlice";
 
 const UserProvider = ({ children }: { children: React.ReactNode }) => {
   const user = useAppSelector((state) => state.user);
@@ -23,6 +24,7 @@ const UserProvider = ({ children }: { children: React.ReactNode }) => {
   const dispatch = useAppDispatch();
   const { showError } = useError();
   const token = getToken();
+
   useEffect(() => {
     async function getUserData() {
       dispatch(beginAuthentication());
@@ -47,6 +49,17 @@ const UserProvider = ({ children }: { children: React.ReactNode }) => {
       getUserData();
     }
   }, [showError, dispatch, user, token]);
+
+  useEffect(() => {
+    if (socket) {
+      socket.on("userOnline", (userId: string) => {
+        dispatch(changeUserStatus({ userId, status: true }));
+      });
+      socket.on("userOffline", (userId: string) => {
+        dispatch(changeUserStatus({ userId, status: false }));
+      });
+    }
+  }, [socket, dispatch]);
 
   return (
     <userContext.Provider value={{ socket }}>{children}</userContext.Provider>
