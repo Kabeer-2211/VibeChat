@@ -22,9 +22,12 @@ export const chatSlice = createSlice({
     setChatMessages: (state, action: PayloadAction<Chat[] | undefined>): void => {
       state.chat = action.payload;
     },
+    addMessage: (state, action: PayloadAction<Chat | undefined>) => {
+      state.chat?.push(action.payload);
+    },
   },
 });
 
-export const { setChat, setChatMessages } = chatSlice.actions;
+export const { setChat, setChatMessages, addMessage } = chatSlice.actions;
 
 export default chatSlice.reducer;

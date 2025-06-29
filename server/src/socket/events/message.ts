@@ -1,6 +1,7 @@
 import { Server, Socket } from "socket.io";
 
 import { messageProducer } from "../../services/producer";
+import UserModel from "../../models/User.model";
 
 export default async (io: Server, socket: Socket) => {
 
@@ -14,10 +15,20 @@ export default async (io: Server, socket: Socket) => {
 
   socket.on("sendMessage", async (data) => {
     data.userId = socket.user.id;
-    io.to(data.chatId).emit("newMessage", data);
 
     if (data) {
-      data.isSeen = io.sockets.adapter.rooms.get(data.chatId)?.size || 0;
+      const isSeen = io.sockets.adapter.rooms.get(data.chatId)?.size || 0;
+      data.isSeen = isSeen === 2;
+      const user = await UserModel.findById(data.userId).lean();
+      const receiver = await UserModel.findById(data.receiverId).lean();
+
+      const message = {
+        ...data,
+        userId: user,
+        receiverId: receiver,
+      };
+
+      io.to(data.chatId).emit("newMessage", message);
       await messageProducer("CHAT", [{ value: JSON.stringify(data) }]);
     }
   });

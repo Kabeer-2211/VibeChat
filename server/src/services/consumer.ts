@@ -14,7 +14,7 @@ export async function messageConsumer() {
           message: msg.message,
           receiverId: msg.receiverId,
           userId: msg.userId,
-          isSeen: msg.roomLength,
+          isSeen: msg.isSeen,
         });
       }
     },

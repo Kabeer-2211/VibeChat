@@ -9,7 +9,7 @@ import { getAvatarName } from "@/helper/helper";
 import { useSession } from "@/hooks/useSession";
 import { useFriend } from "@/hooks/useFriends";
 import { useAppDispatch } from "@/hooks/redux";
-import { setChat } from "@/redux/slices/chatSlice";
+import { addMessage } from "@/redux/slices/chatSlice";
 
 const Chat = () => {
   const { socket } = useSession();
@@ -43,7 +43,8 @@ const Chat = () => {
   useEffect(() => {
     if (socket) {
       socket.on("newMessage", (data) => {
-        dispatch(setChat(data));
+        console.log(data)
+        dispatch(addMessage(data));
       });
     }
   }, [socket]);
