@@ -10,6 +10,7 @@ import {
   blockFriend as block,
   unBlockFriend as unBlock,
   getMessages,
+  updateMessageStatus,
 } from "../services/friend.service";
 
 export async function createFriend(
@@ -201,6 +202,27 @@ export async function getChatMessages(req: Request<{ id: string }>, res: Respons
       success: true,
       message: "Messages retrieved successfully",
       messages,
+    });
+    return;
+  } catch (err) {
+    const error = err as Error;
+    res.status(400).json({ success: false, message: error.message });
+    return;
+  }
+}
+
+export async function markMessageAsRead(req: Request<{ id: string }>, res: Response): Promise<void> {
+  try {
+    const user = req.user;
+    const receiverId = req.params.id;
+    if (!user) {
+      res.status(400).json({ success: false, message: "User not found" });
+      return;
+    }
+    await updateMessageStatus(user.id, receiverId);
+    res.status(200).json({
+      success: true,
+      message: "Messages marked as read successfully",
     });
     return;
   } catch (err) {

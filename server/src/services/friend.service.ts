@@ -174,3 +174,21 @@ export async function getMessages(userId: string, friendId: string): Promise<Cha
   }).populate(["userId", "receiverId"]).lean();
   return messages;
 }
+
+/**
+ * Updates the status of messages between a user and a receiver to 'seen'.
+ * 
+ * This function marks all messages sent by the receiver to the user that are currently
+ * unseen (isSeen set to false) as seen (isSeen set to true).
+ *
+ * @param userId - The ID of the user who is marking messages as seen.
+ * @param receiverId - The ID of the receiver whose messages are being marked as seen.
+ * @returns A promise that resolves when the update operation is complete.
+ */
+export async function updateMessageStatus(userId: string, receiverId: string): Promise<void> {
+  await MessageModel.updateMany({
+    userId: receiverId,
+    receiverId: userId,
+    isSeen: false
+  }, { isSeen: true });
+}

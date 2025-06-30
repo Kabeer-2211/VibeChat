@@ -57,4 +57,8 @@ router.get("/get-chat-messages/:id", [
   param("id").isString().withMessage("id is required")
 ], auth, friendController.getChatMessages);
 
+router.put("/mark-message-as-read/:id", [
+  param("id").isString().withMessage("id is required")
+], auth, friendController.markMessageAsRead);
+
 export default router;

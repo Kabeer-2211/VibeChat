@@ -12,3 +12,6 @@ export const addFriend = async (id: string) => await axios.post<ApiResponse>(`/a
 export const deleteFriend = async (id: string) => await axios.delete<ApiResponse>(`/api/friend/v1/delete-friend/${id}`);
 
 export const getChatMessages = async (id: string) => await axios.get<ApiResponse>(`/api/friend/v1/get-chat-messages/${id}`);
+
+export const markMessageAsRead = async (id: string) => await axios.put<ApiResponse>(`/api/friend/v1/mark-message-as-read/${id}`);
+

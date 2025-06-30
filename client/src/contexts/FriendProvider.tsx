@@ -4,11 +4,12 @@ import { AxiosError } from 'axios';
 
 import { ApiResponse } from '@/types/apiResponse';
 import { useError } from '@/hooks/useError';
-import { acceptFriendRequest, addFriend, deleteFriend, getChatMessages, getFriendRequests, getFriends } from '@/services/friend';
+import { acceptFriendRequest, addFriend, deleteFriend, getChatMessages, getFriendRequests, getFriends, markMessageAsRead } from '@/services/friend';
 import { getUsers } from '@/services/user';
-import { useAppDispatch } from '@/hooks/redux';
+import { useAppDispatch, useAppSelector } from '@/hooks/redux';
 import { setFriends, setUsers, setFriendRequests } from '@/redux/slices/friendSlice';
-import { setChatMessages } from "@/redux/slices/chatSlice";
+import { setChatMessages, updateChat } from "@/redux/slices/chatSlice";
+import { useSession } from '@/hooks/useSession';
 
 export interface FriendContextType {
     fetchFriends: () => void;
@@ -19,6 +20,7 @@ export interface FriendContextType {
     handleAddFriendClick: (id: string, ref: React.RefObject<SVGSVGElement | null>) => void;
     handleUnFriendClick: (id: string) => void;
     fetchMessages: (id: string) => void;
+    updateMessageStatus: (id: string) => void;
 }
 
 export const friendContext = createContext<FriendContextType | undefined>(undefined);
@@ -26,6 +28,8 @@ export const friendContext = createContext<FriendContextType | undefined>(undefi
 const FriendProvider = ({ children }: { children: React.ReactNode }) => {
     const dispatch = useAppDispatch();
     const { showError, showMessage } = useError();
+    const { user, chat } = useAppSelector(state => state);
+    const { socket } = useSession();
 
     const fetchFriends = useCallback(async (): Promise<void> => {
         try {
@@ -132,6 +136,19 @@ const FriendProvider = ({ children }: { children: React.ReactNode }) => {
         }
     }, [dispatch, showError]);
 
+    const updateMessageStatus = useCallback(async (id: string): Promise<void> => {
+        try {
+            const { data } = await markMessageAsRead(id);
+            if (data.success) {
+                dispatch(updateChat(user._id));
+                socket?.emit("messageUpdated", { chatId: chat.currentChat?._id });
+            }
+        } catch (err) {
+            const axiosError = err as AxiosError<ApiResponse>;
+            showError(axiosError.response?.data.message || "Error in marking message as read");
+        }
+    }, [dispatch, showError, user._id, socket, chat.currentChat?._id]);
+
     useEffect(() => {
         fetchFriends();
     }, [fetchFriends]);
@@ -141,7 +158,7 @@ const FriendProvider = ({ children }: { children: React.ReactNode }) => {
     }, [getRequests]);
 
     return (
-        <friendContext.Provider value={{ fetchFriends, searchUsers, getRequests, acceptRequest, declineRequest, handleAddFriendClick, handleUnFriendClick, fetchMessages }}>
+        <friendContext.Provider value={{ fetchFriends, searchUsers, getRequests, acceptRequest, declineRequest, handleAddFriendClick, handleUnFriendClick, fetchMessages, updateMessageStatus }}>
             {children}
         </friendContext.Provider>
     )

@@ -25,9 +25,17 @@ export const chatSlice = createSlice({
     addMessage: (state, action: PayloadAction<Chat | undefined>) => {
       state.chat?.push(action.payload);
     },
+    updateChat: (state, action: PayloadAction<string>) => {
+      state.chat = state.chat?.map(chat => {
+        if (chat.receiverId._id == action.payload) {
+          chat.isSeen = true;
+        }
+        return chat;
+      })
+    }
   },
 });
 
-export const { setChat, setChatMessages, addMessage } = chatSlice.actions;
+export const { setChat, setChatMessages, addMessage, updateChat } = chatSlice.actions;
 
 export default chatSlice.reducer;

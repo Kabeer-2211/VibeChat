@@ -32,4 +32,16 @@ export default async (io: Server, socket: Socket) => {
       await messageProducer("CHAT", [{ value: JSON.stringify(data) }]);
     }
   });
+
+  socket.on('messageUpdated', (data) => {
+    io.to(data.chatId).emit("messageUpdated", data);
+  });
+
+  socket.on("typing", (data) => {
+    io.to(data.chatId).emit("typing", data);
+  });
+
+  socket.on("stopTyping", (data) => {
+    io.to(data.chatId).emit("stopTyping", data);
+  });
 };

@@ -9,15 +9,18 @@ import { getAvatarName } from "@/helper/helper";
 import { useSession } from "@/hooks/useSession";
 import { useFriend } from "@/hooks/useFriends";
 import { useAppDispatch } from "@/hooks/redux";
-import { addMessage } from "@/redux/slices/chatSlice";
+import { addMessage, updateChat } from "@/redux/slices/chatSlice";
+import Indicator from "@/components/Indicator";
 
 const Chat = () => {
   const { socket } = useSession();
   const dispatch = useAppDispatch();
   const [message, setMessage] = useState<string>("");
   const { chat, user } = useAppSelector((state) => state);
-  const { fetchMessages } = useFriend();
+  const { fetchMessages, updateMessageStatus } = useFriend();
   const previousChatId = useRef<string | null>(null);
+  const [isTyping, setIsTyping] = useState(false);
+
   const friend =
     chat.currentChat?.userId._id === user._id
       ? chat.currentChat.friendId
@@ -43,8 +46,26 @@ const Chat = () => {
   useEffect(() => {
     if (socket) {
       socket.on("newMessage", (data) => {
-        console.log(data)
         dispatch(addMessage(data));
+      });
+
+      socket.on("messageUpdated", (data) => {
+        if (chat.currentChat) {
+          dispatch(updateChat(chat.currentChat?.friendId._id));
+        }
+      });
+
+      socket.on("typing", (data) => {
+        console.log(data, user._id);
+        if (data.userId !== user._id) {
+          setIsTyping(true);
+        }
+      });
+
+      socket.on("stopTyping", (data) => {
+        if (data.userId !== user._id) {
+          setIsTyping(false);
+        }
       });
     }
   }, [socket]);
@@ -73,6 +94,15 @@ const Chat = () => {
     }
   }, [chat.currentChat, fetchMessages]);
 
+  useEffect(() => {
+    if (chat.currentChat) {
+      const id = chat.currentChat.userId._id === user._id
+        ? chat.currentChat.friendId._id
+        : chat.currentChat.userId._id;
+      updateMessageStatus(id);
+    }
+  }, [chat.currentChat, updateMessageStatus]);
+
   return (
     <div className="h-screen flex flex-col">
       <div className="p-3 border-b flex items-center gap-4 bg-slate-100">
@@ -93,12 +123,15 @@ const Chat = () => {
         <div className="flex-grow max-h-[75vh] overflow-y-auto p-3">
           {chat.chat &&
             chat.chat.map((item) => (
-              <MessageBubble
-                key={item._id}
-                chat={item}
-                isFriend={item.userId._id !== user._id}
-              />
+              <>
+                <MessageBubble
+                  key={item._id}
+                  chat={item}
+                  isFriend={item.userId._id !== user._id}
+                />
+              </>
             ))}
+          {isTyping && <Indicator pfp={chat.currentChat?.userId._id === user._id ? chat.currentChat?.friendId.avatar : chat.currentChat?.userId.avatar || ""} />}
         </div>
         <form
           onSubmit={handleSendMessage}
@@ -109,7 +142,19 @@ const Chat = () => {
             placeholder="Type a message"
             className="outline-0 flex-grow bg-white p-3 rounded me-6"
             value={message}
-            onChange={(e) => setMessage(e.target.value)}
+            onChange={(e) => {
+              setMessage(e.target.value)
+              socket?.emit("typing", {
+                chatId: chat.currentChat?._id,
+                userId: user._id,
+              })
+            }}
+            onBlur={() => {
+              socket?.emit("stopTyping", {
+                chatId: chat.currentChat?._id,
+                userId: user._id,
+              })
+            }}
           />
           <button>
             <Send className="cursor-pointer" />

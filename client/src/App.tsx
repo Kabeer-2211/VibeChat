@@ -10,13 +10,13 @@ const App = () => {
   return (
     <BrowserRouter>
       <ErrorProvider>
-        <FriendProvider>
-          <UserProvider>
+        <UserProvider>
+          <FriendProvider>
             <Layout>
               <Router />
             </Layout>
-          </UserProvider>
-        </FriendProvider>
+          </FriendProvider>
+        </UserProvider>
       </ErrorProvider>
     </BrowserRouter>
   );
