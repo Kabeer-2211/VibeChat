@@ -27,7 +27,7 @@ export const chatSlice = createSlice({
     },
     updateChat: (state, action: PayloadAction<string>) => {
       state.chat = state.chat?.map(chat => {
-        if (chat.receiverId._id == action.payload) {
+        if (chat.receiverId._id !== action.payload) {
           chat.isSeen = true;
         }
         return chat;

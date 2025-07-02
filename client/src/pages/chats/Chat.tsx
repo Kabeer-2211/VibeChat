@@ -51,12 +51,11 @@ const Chat = () => {
 
       socket.on("messageUpdated", (data) => {
         if (chat.currentChat) {
-          dispatch(updateChat(chat.currentChat?.friendId._id));
+          dispatch(updateChat(user._id));
         }
       });
 
       socket.on("typing", (data) => {
-        console.log(data, user._id);
         if (data.userId !== user._id) {
           setIsTyping(true);
         }
@@ -120,7 +119,7 @@ const Chat = () => {
         </div>
       </div>
       <div className="flex-grow flex flex-col">
-        <div className="flex-grow max-h-[75vh] overflow-y-auto p-3">
+        <div className="flex-grow max-h-[85vh] overflow-y-auto p-3">
           {chat.chat &&
             chat.chat.map((item) => (
               <>
