@@ -27,7 +27,7 @@ const MessageBubble = ({
           </span>
         </div>
         <div
-          className={`flex flex-col leading-1.5 p-4 border-gray-200 ${isFriend ? "bg-gray-200" : "bg-[#2563eb]"
+          className={`flex flex-col leading-1.5 p-4 border-gray-200 w-fit px-5 ${isFriend ? "bg-gray-200" : "bg-[#2563eb]"
             } rounded-e-xl rounded-es-xl`}
         >
           <p
